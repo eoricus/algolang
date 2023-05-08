@@ -1,4 +1,4 @@
-from node import Node
+from ..node import Node
 
 
 class VariableNode(Node):
@@ -8,4 +8,3 @@ class VariableNode(Node):
 
     def __init__(self, name, value):
         self.name = name
-        self.value = value
