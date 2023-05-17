@@ -1,9 +1,8 @@
 import re
 from typing import Literal
-from src.__utils__ import singletone
 
 
-class Lexer(metaclass=singletone.Singleton):
+class Lexer():
     """
     TODO
     """
@@ -13,113 +12,82 @@ class Lexer(metaclass=singletone.Singleton):
         Ининциализация лексера (ключевых слов)
         """
 
+        self.keywords = {
+            # Объявление модуля
+            "АЛГ":      ("module", "declaration"),
+            "ДАНО":     ("module", "parameters"),
+            "НАДО":     ("module", "return_type"),
+            "ВОЗВРАТ":  ("module", "return"),
+            "ВЫХОД":    ("module", "exit"),
+            "НАЧ":      ("module", "start"),
+            "КОН":      ("module", "end"),
+            # Вход программы
+            "НАЧАЛО":   ("global", "start"),
+            "КОНЕЦ":    ("global", "end"),
+            # Условия
+            "ЕСЛИ":     ("condition", "if_declaration"),
+            "ТО":       ("condition", "if_start"),
+            "ИНАЧЕ":    ("condition", "else"),
+            "ВЫБОР":    ("condition", "switch_declaration"),
+            "КОГДА":    ("condition", "case_declaration"),
+            # Циклы
+            "ДЛЯ":      ("loop", "for_declaration"),
+            "ПО":       ("loop", "for_end_of_range"),
+            "ШАГ":      ("loop", "for_step"),
+            "ПОКА":     ("loop", "while_declaration"),
+            "ВЫПОЛНЯТЬ": ("loop", "do_while"),
+            # Типы данных
+            "ЦЕЛ":      ("declaration", "int"),
+            "ВЕЩ":      ("declaration", "float"),
+            "ЛОГ":      ("declaration", "logical"),
+            "СИМВ":     ("declaration", "symbol"),
+            "ТЕКСТ":    ("declaration", "text"),
+            "МАССИВ":   ("declaration", "array"),
+            # Значения
+            "ЛОЖЬ":     ("data", "logical"),
+            "ИСТИНА":   ("data", "logical"),
+            # Арифметические операции
+            "+":        ("arithmetic", "add"),
+            "-":        ("arithmetic", "sub"),
+            "*":        ("arithmetic", "mpy"),
+            "/":        ("arithmetic", "div"),
+            "^":        ("arithmetic", "pow"),
+            "мод":      ("arithmetic", "mod"),
+            # Сравнительные операции
+            "<":        ("relation", "less"),
+            ">":        ("relation", "more"),
+            "<=":       ("relation", "less_or_equal"),
+            ">=":       ("relation", "more_or_equal"),
+            "==":       ("relation", "equal"),
+            "<>":       ("relation", "not_equal"),
+            # Присваивание
+            ":=":       ("assignment", "assign"),
+            # Логические операции
+            "и":        ("logical", "and"),
+            "или":      ("logical", "or"),
+            "не":       ("logical", "not"),
+            # Символы
+            "(":        ("brackets", "open"),
+            ")":        ("brackets", "close"),
+            ",":        ("comma",),
+            # "\"":       ("comma", "text_comma"),
+            # "\'":       ("comma", "symb_comma"),
+            # Ввод-Вывод
+            "ВВОД":     ("io", "input"),
+            "ВЫВОД":    ("io", "output"),
+        }
+
+    def _get_number_type(self, value):
         """
-		ЕСЛИ а == б ТО:
-			a = a + б
-		ИНАЧЕ:
-			ВЫБОР а:
-				КОГДА 1:
-					...
-				КОГДА 2:
-					...
-				ИНАЧЕ:
-					...
-		"""
-        self.CONDITIONS = {
-            "ЕСЛИ",		# определяет начало предиката
-
-            "ТО",  		# следует после предиката
-
-            "ИНАЧЕ", 	# в случае, если предикат ложен
-
-            "ВЫБОР", 	# предшествует аргументу, чье значение
-                        # будут сверяться
-
-            "КОГДА" 	# предшествует значению, с которым
-                        # сравнивается аргумент
-        }
-
+        Проверка корректности числа
         """
-		ДЛЯ i := 1 ПО n ШАГ 1:
-			СУММА := СУММА + i * i
-		"""
-        self.LOOPS = {
-            "ДЛЯ",  	# предшествует присваиванию переменной индекса значения
-
-            "ПО",  		# ледует после присваиваивания переменной индекса значения,
-                        # предшествует конечному значению цикла
-
-            "ШАГ"  		# опционально. Устанавливает шаг с которым будет увеличиваться индекс,
-
-            "ПОКА", 	# предшествует логическому выражению.
-                        # тело будет выполняться, пока условие истинно
-        }
-
-        self.DATA_TYPES = {
-            "ЦЕЛ", 		# целые числа
-
-            "ВЕЩ",  	# вещественные числа
-
-            "ЛОГ",  	# бинарные числа (логические значения, 0 и 1)
-
-            "СИМВ",  	# символьные значения
-
-            "ТЕКСТ",  	# массив символьных значений
-
-            "МАССИВ"  	# предшествует типу данных, определяет переменную как
-                        # массив, состоящий из элементов заданного типа
-        }
-
-        """
-		АЛГ ФАКТОРИАЛ 
-			ДАНО: 
-				n: ЦЕЛ
-			НАДО: ЦЕЛ
-		НАЧ
-			ЦЕЛ факториал
-			
-			ЕСЛИ N <= 1 ТО:
-				ВОЗВРАТ 1
-			ИНАЧЕ:
-				факториал = факториал(n - 1)
-				ВОЗВРАТ n * факториал
-		КОН
-		"""
-        self.MODULES = {
-            "АЛГ",		# ключевое слово для объявления модуля (функции)
-
-            "ДАНО",		# список аргументов, которые принимает модуль
-
-            "НАДО",		# список аргументов, которые возвращает модуль
-                        # может быть пустым, если возвращается лишь одно значение
-
-            "НАЧ",		# начало модуля, слеудет после объявления алгоритма
-                        # если следует без объявления, то выполняется сразу (точка входа)
-
-            "КОН",		# конец модуля
-
-            "ВОЗВРАТ",  # возвращает значение из модуля
-
-            "ВЫХОД", 	# выходит из программы
-        }
-
-        self.ARITHMETIC_OPERATORS = {
-            "+", "-", "*", "/", "^", "мод"
-        }
-
-        self.RELATION_OPERATORS = {
-            "<", ">", "<=", ">=", "=",
-
-            "<>"  # Не равно
-        }
-
-        self.LOGICAL_OPERATORS = {
-            "и", "или", "не", "ложь", "истина"
-        }
-
-        self.BRACKETS = {
-            "(", ")"
-        }
+    
+        if re.match(r'^[-+]?\d+(\.\d*)?$', value):
+            return "float" if '.' in value else "int"
+        elif re.match(r'^[-+]?\.\d+$', value):
+            return "float"
+        else:
+            return None
 
     def _is_valid_identifier(self, value):
         """
@@ -128,31 +96,21 @@ class Lexer(metaclass=singletone.Singleton):
         identifier_regex = re.compile(r'^[_a-zA-Zа-яА-Я][_a-zA-Z0-9а-яА-Я]*$')
         return bool(identifier_regex.match(value))
 
-    def _get_token_type(self, value):
+    def _get_token_type(self, token) -> tuple[str, str]:
         """
         Определение типа токена по его значению
         """
-
-        if value in self.CONDITIONS:
-            return "condition"
-        elif value in self.LOOPS:
-            return "loop"
-        elif value in self.DATA_TYPES:
-            return "data_type"
-        elif value in self.MODULES:
-            return "module"
-        elif value in self.ARITHMETIC_OPERATORS:
-            return "arithmetic_operator"
-        elif value in self.RELATION_OPERATORS:
-            return "relation_operator"
-        elif value in self.LOGICAL_OPERATORS:
-            return "logical_operator"
-        elif value in self.BRACKETS:
-            return "bracket"
-        elif value.isdigit():
-            return "number"
-        elif self._is_valid_identifier(value):
-            return "identifier"
+        print("w:", token)
+        if (token in self.keywords.keys()):
+            return self.keywords[token]
+        elif (token[0] in "\'\""):
+            return ("data", "text") if token[0] == "\"" else ("data", "symbol")
+        elif num_type := self._get_number_type(token):
+            # return ("datatype", "int" if "." in token else "float")
+            # FIXME
+            return ("data", num_type)
+        elif self._is_valid_identifier(token):
+            return ("identifier",)
         else:
             return "invalid"
 
@@ -179,18 +137,20 @@ class Lexer(metaclass=singletone.Singleton):
 
             # Разбиваем строку на слова и операторы
             statements = re.findall(
-                r"[\w']+|[.,!?;:=<>()+\-*/\^]", line)
-
+                r'\"[^\"]+\"|\w+|<=|>=|==|<>|:=|,|[+\-^=\(\)]', line)
+            print(statements)
             for statement in statements:
+                token_as_keyword = self._get_token_type(statement)
+                if (token_as_keyword == "invalid"):
+                    raise SyntaxError(
+                        f"[ERROR]: invalid identifier on line {line_num + 1}: {statement}")
+
                 token = {
                     "value": statement,
-                    "line": line_num,
+                    "key": token_as_keyword,
+                    "line": line_num + 1,
                     "indent": indent_level,
-                    "type": self._get_token_type(statement)
                 }
-
-                if (token["type"] == "invalid"):
-                    token["error"] = f"[ERROR]: invalid identifier on line {line_num}: {statement}"
 
                 tokens.append(token)
 

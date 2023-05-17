@@ -1,0 +1,126 @@
+def _module_return(self):
+    """
+    ВОЗВРАТ
+
+    Обрабатывает оператор возврата значения из модуля, указанный после ключевого слова 'ВОЗВРАТ'.
+    Возвращает узел ReturnNode с выражением, представляющим возвращаемое значение.
+    """
+    self.eat_token('module', 'return')
+    expression = self.parse_expression()  # Замените на свой метод разбора выражений
+    return ReturnNode(expression)
+
+def _module_exit(self):
+    """
+    ВЫХОД
+
+    Обрабатывает оператор выхода из модуля, указанный после ключевого слова 'ВЫХОД'.
+    Возвращает узел ExitNode.
+    """
+    self.eat_token('module', 'exit')
+    return ExitNode()
+
+def _module_start(self):
+    """
+    НАЧ
+
+    Обрабатывает начало тела модуля, указанный после ключевого слова 'НАЧ'.
+    Ничего не возвращает, поскольку это начало блока кода.
+    """
+    self.eat_token('module', 'start')
+
+def _module_end(self):
+    """
+    КОН
+
+    Обрабатывает конец тела модуля, указанный после ключевого слова 'КОН'.
+    Ничего не возвращает, поскольку это конец блока кода.
+    """
+    self.eat_token('module', 'end')
+
+def _condition_if_declaration(self):
+    """
+    ЕСЛИ
+
+    Обрабатывает условный оператор, начинающийся с ключевого слова 'ЕСЛИ'.
+    Возвращает узел IfNode с условием и блоками кода для ветвей 'ТО' и 'ИНАЧЕ'.
+    """
+    self.eat_token('condition', 'if_declaration')
+    condition = self.parse_expression()  # Замените на свой метод разбора выражений
+    self.eat_token('condition', 'if_start')
+    true_block = self.parse_block()  # Замените на свой метод разбора блока кода
+    false_block = None
+
+    if self.current_token['type'] == 'else':
+        self.eat_token('condition', 'else')
+        false_block = self.parse_block()  # Замените на свой метод разбора блока кода
+
+    return IfNode(condition, true_block, false_block)
+
+def _condition_if_start(self):
+    """
+    ТО
+
+    Обрабатывает начало блока кода для ветви 'ТО' условного оператора.
+    Ничего не возвращает, поскольку это начало блока кода.
+    """
+    self.eat_token('condition', 'if_start')
+
+def _condition_else(self):
+    """
+    ИНАЧЕ
+
+    Обрабатывает начало блока кода для
+альтернативной ветви 'ИНАЧЕ' условного оператора.
+    Ничего не возвращает, поскольку это начало блока кода.
+    """
+    self.eat_token('condition', 'else')
+
+def _condition_switch_declaration(self):
+    """
+    ВЫБОР
+
+    Обрабатывает оператор выбора, начинающийся с ключевого слова 'ВЫБОР'.
+    Возвращает узел SwitchNode с выражением для выбора и блоками кода для каждой ветви 'КОГДА'.
+    """
+    self.eat_token('condition', 'switch_declaration')
+    switch_expression = self.parse_expression()  # Замените на свой метод разбора выражений
+    cases = []
+
+    while self.current_token['type'] == 'switch_case_declaration':
+        self.eat_token('condition', 'switch_case_declaration')
+        case_expression = self.parse_expression()  # Замените на свой метод разбора выражений
+        case_block = self.parse_block()  # Замените на свой метод разбора блока кода
+        cases.append((case_expression, case_block))
+
+    return SwitchNode(switch_expression, cases)
+
+def _loop_for_declaration(self):
+    """
+    ДЛЯ
+
+    Обрабатывает цикл 'ДЛЯ', начинающийся с ключевого слова 'ДЛЯ'.
+    Возвращает узел ForNode с инициализацией, условием, обновлением и телом цикла.
+    """
+    self.eat_token('loop', 'for_declaration')
+    init_expression = self.parse_expression()  # Замените на свой метод разбора выражений
+    self.eat_token('loop', 'for_end_of_range')
+    end_expression = self.parse_expression()  # Замените на свой метод разбора выражений
+    step_expression = None
+
+    if self.current_token['type'] == 'for_step':
+        self.eat_token('loop', 'for_step')
+        step_expression = self.parse_expression()  # Замените на свой метод разбора выражений
+
+    loop_body = self.parse_block()  # Замените на свой метод разбора блока кода
+
+    return ForNode(init_expression, end_expression, step_expression, loop_body)
+
+def _loop_for_end_of_range(self):
+    """
+    ПО
+
+    Обрабатывает конец диапазона для цикла 'ДЛЯ', указанный после ключевого слова 'ПО'.
+    Ничего не возвращает, поскольку это часть цикла 'ДЛЯ'.
+    """
+    self.eat_token('loop', 'for_end_of_range')
+```
