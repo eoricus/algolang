@@ -4,42 +4,62 @@ class Token():
         self._index = 0
         self.current = self.list_of_tokens[self.index]
 
+    def __bool__(self) -> bool:
+        return self.current is not None
+
+    def __len__(self) -> int:
+        return len(self.list_of_tokens)
+
     @property
-    def index(self):
+    def index(self) -> int:
         return self._index
 
     @index.setter
-    def index(self, value):
+    def index(self, new_index):
         """
         Двигает указатель на следующий токен и обновляет текущий токен.
         """
-        self._index = value
+        self._index = new_index
 
         if self.index < len(self.list_of_tokens):
             self.current = self.list_of_tokens[self.index]
         else:
             self.current = None
 
-    def is_match(self, *token_key):
+    @property
+    def current(self):
+        return self._current
+
+    @current.setter
+    def current(self, new_current: dict | None):
+        current = new_current if new_current is not None else {}
+
+        self.value = current.get("value")
+        self.key = current.get("key")
+        self.line = current.get("line")
+        self.indent = current.get("indent")
+
+        self._current = new_current
+
+    def is_match(self, *args) -> bool:
         """
         Сверяет текущий токен с референсным значением (token_key)
 
         :param token_key: ключ токена с референсным значением
         :return: состояние соответствия токена
         """
-        keys = []
+        for arg in args:
+            if len(arg) == 2:
+                if arg == self.key:
+                    return True
+            elif len(arg) == 1:
+                if arg[0] == self.key[0]:
+                    return True
+            else:
+                raise ValueError("Аргументы должны быть кортежами длиной 1 или 2")
+        return False
 
-        if len(token_key) == 1:
-            keys = token_key[0] if isinstance(
-                token_key[0], (list, tuple)) else [token_key[0]]
-        elif len(token_key) == 2 and all(isinstance(t, str) for t in token_key):
-            keys = [token_key]
-        else:
-            return False
-
-        return any(self.current["key"] == token for token in keys)
-
-    def eat(self, key, is_raise_an_exception=False):
+    def eat(self, keys, is_raise_an_exception=False):
         """
         Сверяет значение текущего токена с референсным значением (key).
         В случае соответствия двигает указатель на следующий токен.
@@ -49,14 +69,18 @@ class Token():
         :param key: ключ токена с референсным значением
         :param is_raise_an_exception: вызывать ли исключение
         """
-        if not self.is_match(key):
+        # TODO
+        keys = (keys,) if isinstance(keys[0], str) else keys
+
+        if not self.is_match(*keys):
             if is_raise_an_exception:
                 raise SyntaxError(
-                    f"[ОШИБКА ({self.current['line']})]:\nОжидался токен {key}\nПолучен токен {self.current}")
+                    f"[ОШИБКА ({self.current['line']})]:\nОжидался токен {keys}\nПолучен токен {self.current}")
             else:
                 return False
 
         self.index += 1
+        return True
 
     def peek(self):
         """

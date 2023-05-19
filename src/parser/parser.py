@@ -9,7 +9,7 @@ from src.parser.ParserLogical import ParserLogical
 from src.parser.ParserLoops import ParserLoops
 from src.parser.ParserLoops import ParserLoops
 from src.parser.ParserLoops import ParserLoops
-from Token import Token
+from src.parser.Token import Token
 
 
 class Parser(ParserBase):
@@ -17,9 +17,9 @@ class Parser(ParserBase):
         if len(tokens) == 0:
             raise Exception("Empty list of tokens")
         
-        self.token: Token = Token(tokens)
+        self._token: Token = Token(tokens)
 
-        self.handlers = {}
+        self._handlers = {}
 
         self.conditions = ParserConditions(self)
         self.data = ParserData(self)
@@ -30,7 +30,7 @@ class Parser(ParserBase):
         self.modules = ParserModules(self)
         self.relations = ParserRelations(self)
 
-        self.handlers = {
+        self._handlers = {
             # МОДУЛИ
             ("module", "declaration"):              self.modules._declaration,
             ("module", "parameters"):               self.modules._parameters,
@@ -84,11 +84,11 @@ class Parser(ParserBase):
 
     @property
     def token(self):
-        return self.token
+        return self._token
 
     @property
     def handlers(self):
-        return self.handlers
+        return self._handlers
 
     def parse(self):
 

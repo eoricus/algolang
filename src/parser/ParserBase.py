@@ -1,6 +1,6 @@
 from typing import Any
 from src.nodes.a import *
-from Token import Token
+from src.parser.Token import Token
 
 
 class ParserBase():
@@ -125,7 +125,7 @@ class ParserBase():
         statements = []
         indent_level = self.token.current["indent"]
 
-        while (self.token.index < len(self.tokens) and self.token.current["indent"] >= indent_level):
+        while (self.token.index < len(self.token) and self.token.current["indent"] >= indent_level):
             if ((stop_token
                 and self.token.is_match([stop_token, ('module', 'end')]))
                     or (type(token_key := self.token.current["key"]) != tuple)):

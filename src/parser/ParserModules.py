@@ -12,7 +12,7 @@ class ParserModules(ParserBase):
 
         self.token.eat(('module', 'declaration'), True)
 
-        module_name = self.token.current["value"]
+        module_name = self.token.value
         self.token.eat(('identifier',), True)
 
         parameters = self._parameters()
@@ -35,10 +35,10 @@ class ParserModules(ParserBase):
         self.token.eat(('module', 'parameters'))
         parameters = []
 
-        while not (self.token.is_match([("module", "start"), ("module", "return_type")])):
-            param_type = self.token.current["value"]
+        while not (self.token.is_match(("module", "start"), ("module", "return_type"))):
+            param_type = self.token.value
             self.token.eat(('type_declaration',), True)
-            param_name = self.token.current["value"]
+            param_name = self.token.value
             self.token.eat(('identifier',), True)
             parameters.append((param_name, param_type))
 
