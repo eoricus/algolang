@@ -37,12 +37,12 @@ class Lexer():
             "ПОКА":     ("loop", "while_declaration"),
             "ВЫПОЛНЯТЬ": ("loop", "do_while"),
             # Типы данных
-            "ЦЕЛ":      ("declaration", "int"),
-            "ВЕЩ":      ("declaration", "float"),
-            "ЛОГ":      ("declaration", "logical"),
-            "СИМВ":     ("declaration", "symbol"),
-            "ТЕКСТ":    ("declaration", "text"),
-            "МАССИВ":   ("declaration", "array"),
+            "ЦЕЛ":      ("type_declaration", "int"),
+            "ВЕЩ":      ("type_declaration", "float"),
+            "ЛОГ":      ("type_declaration", "logical"),
+            "СИМВ":     ("type_declaration", "symbol"),
+            "ТЕКСТ":    ("type_declaration", "text"),
+            "МАССИВ":   ("type_declaration", "array"),
             # Значения
             "ЛОЖЬ":     ("data", "logical"),
             "ИСТИНА":   ("data", "logical"),
@@ -81,7 +81,7 @@ class Lexer():
         """
         Проверка корректности числа
         """
-    
+
         if re.match(r'^[-+]?\d+(\.\d*)?$', value):
             return "float" if '.' in value else "int"
         elif re.match(r'^[-+]?\.\d+$', value):
@@ -100,7 +100,6 @@ class Lexer():
         """
         Определение типа токена по его значению
         """
-        print("w:", token)
         if (token in self.keywords.keys()):
             return self.keywords[token]
         elif (token[0] in "\'\""):
@@ -109,6 +108,8 @@ class Lexer():
             # return ("datatype", "int" if "." in token else "float")
             # FIXME
             return ("data", num_type)
+        elif re.match(r"\w+\(.*\)", token):
+            return ("module", "call")
         elif self._is_valid_identifier(token):
             return ("identifier",)
         else:
@@ -137,8 +138,8 @@ class Lexer():
 
             # Разбиваем строку на слова и операторы
             statements = re.findall(
-                r'\"[^\"]+\"|\w+|<=|>=|==|<>|:=|,|[+\-^=\(\)]', line)
-            print(statements)
+                r'\"[^\"]+\"|\w+\(.*\)|\w+|<=|>=|==|<>|:=|,|[+\-^=\(\)]', line)
+
             for statement in statements:
                 token_as_keyword = self._get_token_type(statement)
                 if (token_as_keyword == "invalid"):

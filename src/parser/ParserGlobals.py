@@ -1,5 +1,5 @@
-
-from src.parser import ParserBase
+from src.nodes.a import *
+from src.parser.ParserBase import ParserBase
 
 
 class ParserGlobals(ParserBase):
@@ -10,7 +10,7 @@ class ParserGlobals(ParserBase):
         Объявление модуля входа в программу
         """
 
-        self.eat_token(('global', 'start'), True)
+        self.token.eat(('global', 'start'), True)
 
         statements = self.parse_statements()
 
@@ -24,4 +24,4 @@ class ParserGlobals(ParserBase):
 
         Обрабатывает конец тела основной функции
         """
-        self.eat_token(('module', 'end'), True)
+        self.token.eat(('module', 'end'), True)

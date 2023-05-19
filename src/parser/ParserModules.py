@@ -1,4 +1,5 @@
-from src.parser import ParserBase
+from src.nodes.a import *
+from src.parser.ParserBase import ParserBase
 
 
 class ParserModules(ParserBase):
@@ -9,13 +10,15 @@ class ParserModules(ParserBase):
         Объявление нового модуля
         """
 
-        self.eat_token(('module', 'declaration'), True)
+        self.token.eat(('module', 'declaration'), True)
 
-        module_name = self.c_token["value"]
-        self.eat_token(('identifier',), True)
+        module_name = self.token.current["value"]
+        self.token.eat(('identifier',), True)
 
-        parameters = self._module_parameters()
-        return_type = self._module_return_type()
+        parameters = self._parameters()
+        return_type = self._return_type()
+
+        self._start()
 
         statements = self.parse_statements()
 
@@ -29,14 +32,14 @@ class ParserModules(ParserBase):
         Возвращает список кортежей, где каждый кортеж содержит имя параметра и его тип данных.
         """
 
-        self.eat_token(('module', 'parameters'))
+        self.token.eat(('module', 'parameters'))
         parameters = []
 
-        while not (self.check_token(("module", "start")) or self.check_token(("module", "return_type"))):
-            param_name = self.c_token["value"]
-            self.eat_token(('identifier',))
-            param_type = self.c_token["value"]
-            self.eat_token(('datatype',))
+        while not (self.token.is_match([("module", "start"), ("module", "return_type")])):
+            param_type = self.token.current["value"]
+            self.token.eat(('type_declaration',), True)
+            param_name = self.token.current["value"]
+            self.token.eat(('identifier',), True)
             parameters.append((param_name, param_type))
 
         return parameters
@@ -50,9 +53,9 @@ class ParserModules(ParserBase):
         """
 
         return_type = None
-        if self.eat_token(('module', 'return_type')):
-            return_type = self.c_token["value"]
-            self.eat_token(('datatype', ), True)
+        if self.token.eat(('module', 'return_type')):
+            return_type = self.token.current["value"]
+            self.token.eat(('type_declaration', ), True)
 
         return return_type
 
@@ -63,7 +66,7 @@ class ParserModules(ParserBase):
         Обрабатывает оператор возврата значения из модуля, указанный после ключевого слова 'ВОЗВРАТ'.
         Возвращает узел ReturnNode с выражением, представляющим возвращаемое значение.
         """
-        self.eat_token(('module', 'return'))
+        self.token.eat(('module', 'return'))
         return ReturnNode(self.parse_expression())
 
     def _exit(self):
@@ -73,7 +76,7 @@ class ParserModules(ParserBase):
         Обрабатывает оператор выхода из модуля, указанный после ключевого слова 'ВЫХОД'.
         Возвращает узел ExitNode.
         """
-        self.eat_token('module', 'exit')
+        self.token.eat('module', 'exit')
         return ExitNode()
 
     def _start(self):
@@ -83,7 +86,7 @@ class ParserModules(ParserBase):
         Обрабатывает начало тела модуля, указанный после ключевого слова 'НАЧ'.
         Ничего не возвращает, поскольку это начало блока кода.
         """
-        self.eat_token(('module', 'start'), True)
+        self.token.eat(('module', 'start'), True)
 
     def _end(self):
         """
@@ -92,4 +95,7 @@ class ParserModules(ParserBase):
         Обрабатывает конец тела модуля, указанный после ключевого слова 'КОН'.
         Ничего не возвращает, поскольку это конец блока кода.
         """
-        self.eat_token(('module', 'end'), True)
+        self.token.eat(('module', 'end'), True)
+
+    def _call(self):
+        pass

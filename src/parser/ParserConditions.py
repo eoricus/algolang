@@ -1,4 +1,5 @@
-from src.parser import ParserBase
+from src.nodes.a import *
+from src.parser.ParserBase import ParserBase
 
 
 class ParserConditions(ParserBase):
@@ -10,56 +11,48 @@ class ParserConditions(ParserBase):
         слова 'ЕСЛИ'. Возвращает узел IfNode с условием и блоками 
         кода для ветвей 'ТО' и 'ИНАЧЕ'.
         """
-
-        self.eat_token(('condition', 'if_declaration'))
+        print("dwdwdwdwwd")
+        # ЕСЛИ
+        self.token.eat(('condition', 'if_declaration'))
+        # (выражение)
         condition = self.parse_expression()
-
-        self.eat_token(('condition', 'if_start'))
-
+        # ТО
+        self.token.eat(('condition', 'if_start'))
+        # Блок если
         true_block = self.parse_statements(('condition', 'else'))
+        # Блок иначе
         false_block = self.parse_statements()
 
         return ConditionNode(condition, true_block, false_block)
-
-    def _if_start(self):
-        """
-        ТО
-
-        Обрабатывает начало блока кода для ветви 'ТО' условного оператора.
-        Ничего не возвращает, поскольку это начало блока кода.
-        """
-        self.eat_token(('condition', 'if_start'))
-
-    def _else(self):
-        """
-        ИНАЧЕ
-
-        Обрабатывает начало блока кода для
-        альтернативной ветви 'ИНАЧЕ' условного оператора.
-        Ничего не возвращает, поскольку это начало блока кода.
-        """
-        self.eat_token(('condition', 'else'))
 
     def _switch_declaration(self):
         """
         ВЫБОР
 
         """
-        self.eat_token(('condition', 'switch_declaration'))
+        # ВЫБОР
+        self.token.eat(('condition', 'switch_declaration'))
+        # (выражение)
+        reference = self.parse_expression()
 
         cases = []
-        while self.check_token(("condition", "case_declaration")):
-            case_node = self._condition_case_declaration()
+        while self.token.is_match(("condition", "case_declaration")):
+            case_node = self._case_declaration()
             cases.append(case_node)
 
-        return SwitchNode(cases)
+        return SwitchNode(reference, cases)
 
     def _case_declaration(self):
         """
         КОГДА
         """
-        self.eat_token(('condition', 'case_declaration'))
+        # КОГДА
+        self.token.eat(('condition', 'case_declaration'))
+        # (выражение)
         case_condition = self.parse_expression()
-        self.eat_token(('condition', 'if_start'))
+        # ТО
+        self.token.eat(('condition', 'if_start'))
+        # блок кода
         case_block = self.parse_statements(('condition', 'case_declaration'))
+
         return CaseNode(case_condition, case_block)

@@ -73,7 +73,7 @@ class TypeDeclarationArrayNode(TypeDeclarationNode):
         self.values = values or []
 # ВЫРАЖЕНИЯ
 class IdentifierNode():
-    def __init__(self, name, expression, type):
+    def __init__(self, name, expression=None, type=None):
         self.name = name
         self.expression = expression
         self.type = type
@@ -191,4 +191,19 @@ class CallNode(Node):
         self.args = args
 
 class InputNode(Node):
+    def __init__(self, expr):
+        print("expr")
+    pass
+
+class OutputNode(Node):
+    pass
+
+class ModuleNode(Node):
+    def __init__(self, name, parameters, return_type, body_statements):
+        self.name = name
+        self.parameters = parameters
+        self.return_type = return_type
+        self.body_statements = body_statements
+
+class MainNode(Node):
     pass

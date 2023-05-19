@@ -1,4 +1,5 @@
-from src.parser import ParserBase
+from src.nodes.a import *
+from src.parser.ParserBase import ParserBase
 
 
 class ParserLoops(ParserBase):
@@ -7,7 +8,7 @@ class ParserLoops(ParserBase):
         ДЛЯ
         """
 
-        self.eat_token(('loop', 'for_declaration'), True)
+        self.token.eat(('loop', 'for_declaration'), True)
 
         var = self._identifier_()
 
@@ -25,20 +26,20 @@ class ParserLoops(ParserBase):
         """
         ПО
         """
-        self.eat_token(('loop', "for_end_of_range"), True)
+        self.token.eat(('loop', "for_end_of_range"), True)
 
     def _for_step(self):
         """
         ШАГ
         """
 
-        return self.parse_expression() if self.eat_token(("loop", "for_step")) else None
+        return self.parse_expression() if self.token.eat(("loop", "for_step")) else None
 
     def _while_declaration(self):
         """
         ПОКА
         """
-        self.eat_token(('loop', 'while_declaration'), True)
+        self.token.eat(('loop', 'while_declaration'), True)
         condition = self.parse_expression()
         self._condition_if_start()
         statements = self.parse_statements()
@@ -49,8 +50,8 @@ class ParserLoops(ParserBase):
         """
         ВЫПОЛНЯТЬ ... ПОКА
         """
-        self.eat_token(('loop', 'do_while'), True)
+        self.token.eat(('loop', 'do_while'), True)
         statements = self.parse_statements()
-        self.eat_token(('loop', 'while_declaration'), True)
+        self.token.eat(('loop', 'while_declaration'), True)
         expression = self.parse_expression()
         return WhileLoopNode(statements, expression, True)

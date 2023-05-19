@@ -1,5 +1,5 @@
-
-from src.parser import ParserBase
+from src.nodes.a import *
+from src.parser.ParserBase import ParserBase
 
 
 class ParserLogical(ParserBase):

@@ -1,9 +1,14 @@
-from src.parser import ParserBase
+from src.nodes.a import *
+from src.parser.ParserBase import ParserBase
 
 
 class ParserIO(ParserBase):
     def _input(self):
-        pass
+        self.token.eat(('io', 'input'), True)
+        expr = self.parse_expression()
+        return InputNode(expr)
 
     def _output(self):
-        pass
+        self.token.eat(('io', 'output'), True)
+        expr = self.parse_expression()
+        return OutputNode(expr)

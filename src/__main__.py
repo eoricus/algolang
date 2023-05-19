@@ -2,7 +2,7 @@ import sys
 
 from .lexer import Lexer
 # FIXME
-from ._parser.parser import Parser
+from .parser.Parser import Parser
 
 def main():
     # if len(sys.argv) < 3 or sys.argv[1] != 'run':
@@ -24,9 +24,9 @@ def main():
     for token in tokens:
         print(token)
     
-    # parser = Parser(tokens)
+    parser = Parser(tokens)
 
-    # print(parser.parse())
+    print(parser.parse())
 
 if __name__ == '__main__':
     main()
