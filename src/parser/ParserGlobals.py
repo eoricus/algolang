@@ -16,6 +16,8 @@ class ParserGlobals(ParserBase):
 
         for statement in statements:
             print(statement.name)
+
+        self.token.next()
         return MainNode(statements)
 
     def _end(self):

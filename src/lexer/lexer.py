@@ -42,7 +42,7 @@ class Lexer():
             "ЛОГ":      ("type_declaration", "logical"),
             "СИМВ":     ("type_declaration", "symbol"),
             "ТЕКСТ":    ("type_declaration", "text"),
-            "МАССИВ":   ("type_declaration", "array"),
+            "МАССИВ":   ("arr_declaration",),
             # Значения
             "ЛОЖЬ":     ("data", "logical"),
             "ИСТИНА":   ("data", "logical"),
@@ -70,6 +70,8 @@ class Lexer():
             "(":        ("brackets", "open"),
             ")":        ("brackets", "close"),
             ",":        ("comma",),
+            "[":        ("sq_brackets", "open"),
+            "]":        ("sq_brackets", "close"),
             # "\"":       ("comma", "text_comma"),
             # "\'":       ("comma", "symb_comma"),
             # Ввод-Вывод
@@ -108,8 +110,6 @@ class Lexer():
             # return ("datatype", "int" if "." in token else "float")
             # FIXME
             return ("data", num_type)
-        elif re.match(r"\w+\(.*\)", token):
-            return ("module", "call")
         elif self._is_valid_identifier(token):
             return ("identifier",)
         else:
@@ -138,7 +138,7 @@ class Lexer():
 
             # Разбиваем строку на слова и операторы
             statements = re.findall(
-                r'\"[^\"]+\"|\w+\(.*\)|\w+|<=|>=|==|<>|:=|,|[+\-^=\(\)]', line)
+                r'\'[^\"]+\'|\"[^\"]+\"|\w+|<=|>=|==|<>|:=|,|[+\-^=\(\)\[\]]', line)
 
             for statement in statements:
                 token_as_keyword = self._get_token_type(statement)

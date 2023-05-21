@@ -1,68 +1,23 @@
 from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
+from typing import Union
 
 
 class ParserData(ParserBase):
-    def _declaration_int(self):
-        self.token.eat(('type_declaration', 'int'), True)
+    def _declaration(self, type: str, is_arr: bool = False):
+        """
+        ОБЪЯВЛЕНИЕ ТИПА
+        ЦЕЛ, ВЕЩ, ЛОГ, СИМВ, ТЕКСТ
+        """
+        if is_arr:
+            self.token.eat(('arr_declaration',), True)
 
-        return TypeDeclarationIntNode(self._identifier())
+        self.token.eat(('type_declaration',), True)
 
-    def _data_int(self):
-        node = IntNode(self.token.current)
-        self.token.eat(('data', 'int'), True)
-        return node
-
-    def _declaration_float(self):
-        self.token.eat(('type_declaration', 'float'), True)
-
-        return TypeDeclarationFloatNode(self._identifier())
-
-    def _data_float(self):
-        node = FloatNode(self.token.current)
-        self.token.eat(('data', 'float'), True)
-        return node
-
-    def _declaration_logical(self):
-        self.token.eat(('type_declaration', 'logical'), True)
-
-        return TypeDeclarationLogicalNode(self._identifier())
-
-    def _data_logical(self):
-        node = LogicalNode(self.token.current)
-        self.token.eat(('data', 'logical'), True)
-        return node
-
-    def _declaration_symbol(self):
-        self.token.eat(('type_declaration', 'symbol'), True)
-
-        return TypeDeclarationSymbolNode(self._identifier())
-
-    def _data_symbol(self):
-        node = LiteralNode(self.token.current)
-        self.token.eat(('data', 'symbol'), True)
-        return node
-
-    def _declaration_text(self):
-        self.token.eat(('type_declaration', 'text'), True)
-
-        return TypeDeclarationTextNode(self._identifier())
-
-    def _data_text(self):
-        node = LiteralNode(self.token.current)
-        self.token.eat(('data', 'text'), True)
-        return node
-
-    def _declaration_array(self):
-        self.token.eat(('type_declaration', 'array'), True)
-
-        length = self.parse_expression()
-
-        if self.token.is_match(("type_declaration",)):
-            datatype = self.token.current["key"]
+        # TODO: Добавить новый класс для всех токенов чтобы вызывать
+        # это все нормально. Например, как self.token.peek().is_match()
+        # Но это требует час работы, которой у меня сейчас нет
+        if self.token.is_match(("identifier",)):
+            return self._identifier(TypeDeclarationNode(type, is_arr))
         else:
-            return self.error(
-                f"[ОШИБКА ({self.token.current['line']})] Ожидался тип данных (ЦЕЛ, ВЕЩ, ЛОГ, СИМВ, ТЕКСТ, МАССИВ). Получено:\n{self.token.current}")
-
-        self.token.eat(datatype, True)
-        return TypeDeclarationArrayNode(self._identifier(), length, datatype)
+            return TypeDeclarationNode(type, is_arr)

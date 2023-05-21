@@ -1,3 +1,4 @@
+from pprint import pprint
 import sys
 
 from .lexer import Lexer
@@ -5,6 +6,7 @@ from .lexer import Lexer
 from .parser.Parser import Parser
 
 def main():
+    # TODO: Запись с файла из аргументов командной строки
     # if len(sys.argv) < 3 or sys.argv[1] != 'run':
     #     print(sys.argv)
     #     print("Usage: algolang run <filename>")
@@ -26,7 +28,7 @@ def main():
     
     parser = Parser(tokens)
 
-    print(parser.parse())
+    pprint(parser.parse())
 
 if __name__ == '__main__':
     main()

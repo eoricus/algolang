@@ -21,6 +21,8 @@ class ParserModules(ParserBase):
         self._start()
 
         statements = self.parse_statements()
+        
+        self.token.next()
 
         return ModuleNode(module_name, parameters, return_type, statements)
 
@@ -35,13 +37,14 @@ class ParserModules(ParserBase):
         self.token.eat(('module', 'parameters'))
         parameters = []
 
-        while not (self.token.is_match(("module", "start"), ("module", "return_type"))):
+        while (self.token.is_match(('type_declaration',), ('identifier',))):
             param_type = self.token.value
             self.token.eat(('type_declaration',), True)
             param_name = self.token.value
             self.token.eat(('identifier',), True)
             parameters.append((param_name, param_type))
 
+        # if (self.token.is_match(("module", "start"), ("module", "return_type"))):
         return parameters
 
     def _return_type(self):
@@ -54,9 +57,9 @@ class ParserModules(ParserBase):
 
         return_type = None
         if self.token.eat(('module', 'return_type')):
-            return_type = self.token.current["value"]
+            return_type = self.token.value
             self.token.eat(('type_declaration', ), True)
-
+        
         return return_type
 
     def _return(self):
@@ -98,4 +101,4 @@ class ParserModules(ParserBase):
         self.token.eat(('module', 'end'), True)
 
     def _call(self):
-        pass
+        self.token.eat(('module', 'call'), True)

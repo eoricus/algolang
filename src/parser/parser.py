@@ -17,9 +17,9 @@ class Parser(ParserBase):
         if len(tokens) == 0:
             raise Exception("Empty list of tokens")
         
-        self._token: Token = Token(tokens)
+        self._TOKEN: Token = Token(tokens)
 
-        self._handlers = {}
+        self._HANDLERS = {}
 
         self.conditions = ParserConditions(self)
         self.data = ParserData(self)
@@ -30,7 +30,7 @@ class Parser(ParserBase):
         self.modules = ParserModules(self)
         self.relations = ParserRelations(self)
 
-        self._handlers = {
+        self._HANDLERS = {
             # МОДУЛИ
             ("module", "declaration"):              self.modules._declaration,
             ("module", "parameters"):               self.modules._parameters,
@@ -54,12 +54,12 @@ class Parser(ParserBase):
             ("loop", "while_declaration"):          self.loops._while_declaration,
             ("loop", "do_while"):                   self.loops._do_while,
             # ДЕКЛАРАЦИИ ТИПОВ
-            ("type_declaration", "int"):            self.data._declaration_int,
-            ("type_declaration", "float"):          self.data._declaration_float,
-            ("type_declaration", "logical"):        self.data._declaration_logical,
-            ("type_declaration", "symbol"):         self.data._declaration_symbol,
-            ("type_declaration", "text"):           self.data._declaration_text,
-            ("type_declaration", "array"):          self.data._declaration_array,
+            ("type_declaration", "int"):            lambda: self.data._declaration("int"),
+            ("type_declaration", "float"):          lambda: self.data._declaration("float"),
+            ("type_declaration", "logical"):        lambda: self.data._declaration("logical"),
+            ("type_declaration", "symbol"):         lambda: self.data._declaration("symbol"),
+            ("type_declaration", "text"):           lambda: self.data._declaration("text"),
+            ("arr_declaration",):                   lambda: self.data._declaration("text", True),
             # ОТНОШЕНИЯ
             ("relation", "less"):                   self.relations._less,
             ("relation", "more"):                   self.relations._more,
@@ -73,9 +73,6 @@ class Parser(ParserBase):
             ("logical", "and"):                     self.logical._and,
             ("logical", "or"):                      self.logical._or,
             ("logical", "not"):                     self.logical._not,
-            # ВЫРАЖЕНИЯ
-            # ("brackets", "open"):                   self.parse_expression,
-            # ("brackets", "close"):                  self.expressions._close,
             # ВВОД-ВЫВОД
             ('io', 'input'): 						self.io._input,
             ("io", "output"): 						self.io._output,
@@ -84,18 +81,18 @@ class Parser(ParserBase):
 
     @property
     def token(self):
-        return self._token
+        return self._TOKEN
 
     @property
-    def handlers(self):
-        return self._handlers
+    def HANDLERS(self):
+        return self._HANDLERS
 
-    def parse(self):
+    def parse(self) -> list:
 
-        root = self.parse_statements()
+        root: list = self.parse_statements()
 
-        if not self.token.is_match([('module', 'end'), ("global", "end")]):
+        if not self.token.is_match(('module', 'end'), ("global", "end")):
             self.error(
-                f"Ожидался конец программы (КОН), получен {self.token.current['key']}")
+                f"Ожидался конец программы (КОН), получен {self.token.key}")
 
         return root

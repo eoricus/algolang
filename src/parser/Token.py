@@ -1,51 +1,33 @@
-class Token():
-    def __init__(self, list_of_tokens):
-        self.list_of_tokens = list_of_tokens
-        self._index = 0
-        self.current = self.list_of_tokens[self.index]
+from typing import Optional, Union, Tuple
 
-    def __bool__(self) -> bool:
-        return self.current is not None
 
-    def __len__(self) -> int:
-        return len(self.list_of_tokens)
+class Lexeme():
+    """
+    Базовый класс для токенов
+    """
 
-    @property
-    def index(self) -> int:
-        return self._index
+    def __init__(self, **kwargs):
+        # Содержимое токена
+        self.value: Optional[str] = kwargs.get("value")
+        # Ключ токена (идентификатор)
+        self.key: Optional[tuple[str, Optional[str]]] = kwargs.get("key")
+        # Строка токена
+        self.line: Optional[int] = kwargs.get("line")
+        # Количество отступов токена
+        self.indent: Optional[int] = kwargs.get("indent")
 
-    @index.setter
-    def index(self, new_index):
-        """
-        Двигает указатель на следующий токен и обновляет текущий токен.
-        """
-        self._index = new_index
+    def __str__(self) -> str:
+        return f'value: {self.value}, key: {self.key}, line: {self.line}, indent: {self.indent}'
 
-        if self.index < len(self.list_of_tokens):
-            self.current = self.list_of_tokens[self.index]
-        else:
-            self.current = None
-
-    @property
-    def current(self):
-        return self._current
-
-    @current.setter
-    def current(self, new_current: dict | None):
-        current = new_current if new_current is not None else {}
-
-        self.value = current.get("value")
-        self.key = current.get("key")
-        self.line = current.get("line")
-        self.indent = current.get("indent")
-
-        self._current = new_current
+    # TODO: Перевести сравнение токенов сюда 
+    # def __eq__(self, __value: object) -> bool:
+    #     pass
 
     def is_match(self, *args) -> bool:
         """
-        Сверяет текущий токен с референсным значением (token_key)
+        Сверяет текущий токен с референсным значением (args)
 
-        :param token_key: ключ токена с референсным значением
+        :param args: ключи токена с референсными значениями
         :return: состояние соответствия токена
         """
         for arg in args:
@@ -56,17 +38,85 @@ class Token():
                 if arg[0] == self.key[0]:
                     return True
             else:
-                raise ValueError("Аргументы должны быть кортежами длиной 1 или 2")
+                raise ValueError(
+                    "Аргументы должны быть кортежами длиной 1 или 2")
         return False
 
-    def eat(self, keys, is_raise_an_exception=False):
+
+class NoneLexeme(Lexeme):
+    """
+    Синглтон для пустого токена
+    """
+    _instance = None
+
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        self.value = self.key = self.line = self.indent = None
+
+
+noneLexeme = NoneLexeme()
+
+
+class Token(Lexeme):
+    def __init__(self, args):
+        self.lexemes = [Lexeme(**arg) for arg in args]
+
+        if not self.lexemes:
+            raise ValueError("Пустой список токенов")
+
+        self._index: int = 0
+        self.current: Lexeme | NoneLexeme = self.lexemes[self._index]
+
+    def __bool__(self) -> bool:
+        return self.current is not noneLexeme
+
+    def __len__(self) -> int:
+        return len(self.lexemes) - 1
+
+    @property
+    def index(self) -> int:
+        return self._index
+
+    @index.setter
+    def index(self, new_index):
         """
-        Сверяет значение текущего токена с референсным значением (key).
+        Двигает указатель на следующий токен и обновляет текущий токен.
+
+        Сеттер нужен затем, чтобы никогда не происходило расхождения между
+        self.current и индексом
+        """
+        self._index = new_index
+
+        if self.index < len(self.lexemes):
+            self.current = self.lexemes[self.index]
+        else:
+            self.current = noneLexeme
+
+    @property
+    def current(self) -> Lexeme | NoneLexeme:
+        return self._current
+
+    @current.setter
+    def current(self, new_current: Lexeme | NoneLexeme):
+        self.value = new_current.value
+        self.key = new_current.key
+        self.line = new_current.line
+        self.indent = new_current.indent
+
+        self._current = new_current
+
+    def eat(self, keys, is_raise_an_exception=False) -> bool:
+        """
+        Сверяет значение текущего токена с референсными значениями (keys).
         В случае соответствия двигает указатель на следующий токен.
         Иначе возвращает False, или если raise_an_exception истинен, то 
         вызывает исключение.
 
-        :param key: ключ токена с референсным значением
+        :param keys: ключи токенов с референсным значением
         :param is_raise_an_exception: вызывать ли исключение
         """
         # TODO
@@ -75,15 +125,21 @@ class Token():
         if not self.is_match(*keys):
             if is_raise_an_exception:
                 raise SyntaxError(
-                    f"[ОШИБКА ({self.current['line']})]:\nОжидался токен {keys}\nПолучен токен {self.current}")
+                    f"[ОШИБКА ({self.current.line})]:\nОжидался токен {keys}\nПолучен токен {self.current}")
             else:
                 return False
 
         self.index += 1
         return True
 
-    def peek(self):
+    def peek(self) -> Lexeme | NoneLexeme:
         """
         Возвращает следующий токен без перемещения указателя
         """
-        return self.list_of_tokens[self.index + 1] if self.index < len(self.list_of_tokens) - 1 else None
+        return self.lexemes[self.index + 1] if self.index < len(self.lexemes) - 1 else noneLexeme
+
+    def next(self) -> None:
+        """
+        Двигает указатель на следующий токен
+        """
+        self.index += 1

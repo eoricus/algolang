@@ -19,9 +19,10 @@ class ParserConditions(ParserBase):
         # ТО
         self.token.eat(('condition', 'if_start'))
         # Блок если
-        true_block = self.parse_statements(('condition', 'else'))
-        # Блок иначе
-        false_block = self.parse_statements()
+        true_block = self.parse_statements()
+        false_block = self.parse_statements() if self.token.eat(('condition', 'else')) else None
+
+        self.token.next()
 
         return ConditionNode(condition, true_block, false_block)
 
@@ -54,5 +55,7 @@ class ParserConditions(ParserBase):
         self.token.eat(('condition', 'if_start'))
         # блок кода
         case_block = self.parse_statements(('condition', 'case_declaration'))
+
+        self.token.next()
 
         return CaseNode(case_condition, case_block)

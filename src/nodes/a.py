@@ -2,22 +2,25 @@ class Node:
     pass
 
 # CONDITIONS:
+
+
 class CaseNode:
     def __init__(self, condition, block):
         self.condition = condition
         self.block = block
 
+
 class ConditionNode(Node):
     """
     Условные операции
 
-        
+
     __Код:
     ЕСЛИ x < 10 ТО
         y = 0
     ИНАЧЕ
         y = 1
-    
+
     __Узел:
     ConditionNode(
         BinaryOperatorNode(VariableNode("x"), "<", NumberNode(10)),
@@ -31,11 +34,14 @@ class ConditionNode(Node):
         self.if_true_statements = if_true_statements
         self.if_false_statements = if_false_statements or []
 
+
 class SwitchNode:
     def __init__(self, cases):
         self.cases = cases
 
 # TYPE DECLARATIONS:
+
+
 class TypeDeclarationNode():
     def __init__(self, identifier_node):
         self.identifier_node = identifier_node
@@ -72,11 +78,14 @@ class TypeDeclarationArrayNode(TypeDeclarationNode):
         self.TypeDeclaration = TypeDeclaration
         self.values = values or []
 # ВЫРАЖЕНИЯ
+
+
 class IdentifierNode():
     def __init__(self, name, expression=None, type=None):
         self.name = name
         self.expression = expression
         self.type = type
+
 
 class LiteralNode(Node):
     """
@@ -86,6 +95,7 @@ class LiteralNode(Node):
     def __init__(self, value):
         self.value = value
 
+
 class NumberNode(Node):
     """
     Числовое значение
@@ -94,19 +104,24 @@ class NumberNode(Node):
     def __init__(self, value):
         self.value = value
 
+
 class BinaryOperationNode(Node):
     def __init__(self, operator, left, right):
         self.operator = operator
         self.left = left
         self.right = right
 
+
 class ArithmeticOperationNode(BinaryOperationNode):
     pass
+
 
 class LogicalOperationNode(BinaryOperationNode):
     pass
 
 # ЦИКЛЫ
+
+
 class ForLoopNode(Node):
     """
     Цикл for
@@ -114,7 +129,7 @@ class ForLoopNode(Node):
     __Код:
     ДЛЯ i = 1 ПО 10 ШАГ 1
         x = x + i
-    
+
     __Узел:
     ForLoopNode(
         VariableNode("i"),
@@ -125,12 +140,12 @@ class ForLoopNode(Node):
     )
     """
 
-
     def __init__(self, variable, n, statements, step=None):
         self.variable = variable
         self.n = n
         self.statements = statements
         self.step = step
+
 
 class WhileLoopNode(Node):
     """
@@ -148,14 +163,17 @@ class WhileLoopNode(Node):
     )
     """
 
-    def __init__(self, condition_expr, loop_statements, do = False):
+    def __init__(self, condition_expr, loop_statements, do=False):
         self.condition_expr = condition_expr
         self.loop_statements = loop_statements
         self.do = do
+
+
 class ExitNode(Node):
     """
     Выход
     """
+
 
 class ReturnNode(Node):
     """
@@ -173,30 +191,39 @@ class ReturnNode(Node):
     def __init__(self, expression):
         self.expression = expression
 
+
 class IntNode(Node):
     def __init__(self, value):
         self.value = value
+
 
 class FloatNode(Node):
     def __init__(self, value):
         self.value = value
 
+
 class LogicalNode(Node):
     def __init__(self, value):
         self.value = value
 
+
 class CallNode(Node):
-    def __init__(self, name, args):
+    def __init__(self, name, arguments):
         self.name = name
-        self.args = args
+        self.arguments = arguments
+
 
 class InputNode(Node):
     def __init__(self, expr):
         print("expr")
     pass
 
+
 class OutputNode(Node):
+    def __init__(self, expr):
+        print("expr")
     pass
+
 
 class ModuleNode(Node):
     def __init__(self, name, parameters, return_type, body_statements):
@@ -205,5 +232,11 @@ class ModuleNode(Node):
         self.return_type = return_type
         self.body_statements = body_statements
 
+
 class MainNode(Node):
     pass
+
+
+class TypeDeclarationNode(Node):
+    def __init__(self, type, is_arr):
+        pass

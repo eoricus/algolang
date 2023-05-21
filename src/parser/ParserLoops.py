@@ -7,18 +7,20 @@ class ParserLoops(ParserBase):
         """
         ДЛЯ
         """
-
+        
         self.token.eat(('loop', 'for_declaration'), True)
 
-        var = self._identifier_()
+        var = self._identifier()
 
-        self._loop_for_end_of_range()
+        self._for_end_of_range()
 
         num = self.parse_expression()
 
-        step = self._loop_for_step()
+        step = self._for_step()
 
         statements = self.parse_statements()
+
+        self.token.next()
 
         return ForLoopNode(var, num, statements, step)
 
@@ -44,6 +46,8 @@ class ParserLoops(ParserBase):
         self._condition_if_start()
         statements = self.parse_statements()
 
+        self.token.next()
+
         return WhileLoopNode(condition, statements)
 
     def _do_while(self):
@@ -54,4 +58,6 @@ class ParserLoops(ParserBase):
         statements = self.parse_statements()
         self.token.eat(('loop', 'while_declaration'), True)
         expression = self.parse_expression()
+
+        self.token.next()
         return WhileLoopNode(statements, expression, True)
