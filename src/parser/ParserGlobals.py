@@ -15,9 +15,9 @@ class ParserGlobals(ParserBase):
         statements = self.parse_statements()
 
         for statement in statements:
-            print(statement.name)
+            print(statement)
 
-        self.token.next()
+        # self.token.next()
         return MainNode(statements)
 
     def _end(self):
@@ -26,4 +26,5 @@ class ParserGlobals(ParserBase):
 
         Обрабатывает конец тела основной функции
         """
-        self.token.eat(('module', 'end'), True)
+        pass
+        # self.token.eat(('module', 'end'), True)

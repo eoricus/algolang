@@ -22,7 +22,7 @@ class ParserModules(ParserBase):
 
         statements = self.parse_statements()
         
-        self.token.next()
+        # self.token.next()
 
         return ModuleNode(module_name, parameters, return_type, statements)
 

@@ -234,7 +234,8 @@ class ModuleNode(Node):
 
 
 class MainNode(Node):
-    pass
+    def __init__(self, type, ):
+        pass
 
 
 class TypeDeclarationNode(Node):

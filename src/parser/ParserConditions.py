@@ -11,7 +11,6 @@ class ParserConditions(ParserBase):
         слова 'ЕСЛИ'. Возвращает узел IfNode с условием и блоками 
         кода для ветвей 'ТО' и 'ИНАЧЕ'.
         """
-        print("dwdwdwdwwd")
         # ЕСЛИ
         self.token.eat(('condition', 'if_declaration'))
         # (выражение)

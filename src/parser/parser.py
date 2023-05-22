@@ -1,3 +1,5 @@
+from typing import Optional
+from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 from src.parser.ParserModules import ParserModules
 from src.parser.ParserRelations import ParserRelations
@@ -16,7 +18,7 @@ class Parser(ParserBase):
     def __init__(self, tokens):
         if len(tokens) == 0:
             raise Exception("Empty list of tokens")
-        
+
         self._TOKEN: Token = Token(tokens)
 
         self._HANDLERS = {}
@@ -89,10 +91,18 @@ class Parser(ParserBase):
 
     def parse(self) -> list:
 
-        root: list = self.parse_statements()
+        modules, main = self.parse_statements()
 
+        # Проверка модуля входа в программу (main)
+        if main and not isinstance(main, MainNode):
+            self.error(
+                "Неправильно определен основной модуль программы (точка входа)")
+        # Проверка полученных модулей
+        if not all(isinstance(module, ModuleNode) for module in modules):
+            self.error("Программа не может содержать выражения вне модулей")
+        # Проверка конца программы
         if not self.token.is_match(('module', 'end'), ("global", "end")):
             self.error(
                 f"Ожидался конец программы (КОН), получен {self.token.key}")
 
-        return root
+        return modules, main

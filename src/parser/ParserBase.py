@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from src.nodes.a import *
 from src.parser.Token import Token
 
@@ -134,8 +134,12 @@ class ParserBase():
         return left
 
     def parse_statements(self, stop_token=None) -> list:
+        """
+        TODO:
+        """
         statements: list = []
         indent_level: int = self.token.indent
+        main: Optional[MainNode] = None
 
         while (self.token.index < len(self.token) and self.token.indent >= indent_level):
             if ((stop_token
@@ -144,13 +148,17 @@ class ParserBase():
                 break
 
             handler: function | None = self.HANDLERS.get(self.token.key)
+
+            # TODO: Сделать функцию декоратор для всех методов, которые
+            #       должны сдвигать указатель токена вперед
             if handler is None:
                 if (self.token.key[0] == "data"):
                     self.parse_expression()
                 self.error(f"Неожиданный тип токена {self.token.current}")
 
-            res = handler()
+            if self.token.is_match(("global", "start")):
+                main = handler()
+            else:
+                statements.append(handler())
 
-            statements.append(res)
-
-        return statements
+        return statements, main
