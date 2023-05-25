@@ -11,6 +11,8 @@ class ParserConditions(ParserBase):
         слова 'ЕСЛИ'. Возвращает узел IfNode с условием и блоками 
         кода для ветвей 'ТО' и 'ИНАЧЕ'.
         """
+        token_line = self.token.line
+
         # ЕСЛИ
         self.token.eat(('condition', 'if_declaration'))
         # (выражение)
@@ -23,13 +25,15 @@ class ParserConditions(ParserBase):
 
         self.token.next()
 
-        return ConditionNode(condition, true_block, false_block)
+        return ConditionNode(token_line, condition, true_block, false_block)
 
     def _switch_declaration(self):
         """
         ВЫБОР
 
         """
+        token_line = self.token.line
+
         # ВЫБОР
         self.token.eat(('condition', 'switch_declaration'))
         # (выражение)
@@ -40,12 +44,14 @@ class ParserConditions(ParserBase):
             case_node = self._case_declaration()
             cases.append(case_node)
 
-        return SwitchNode(reference, cases)
+        return SwitchNode(token_line, reference, cases)
 
     def _case_declaration(self):
         """
         КОГДА
         """
+        token_line = self.token.line
+
         # КОГДА
         self.token.eat(('condition', 'case_declaration'))
         # (выражение)
@@ -57,4 +63,4 @@ class ParserConditions(ParserBase):
 
         self.token.next()
 
-        return CaseNode(case_condition, case_block)
+        return CaseNode(token_line, case_condition, case_block)

@@ -1,3 +1,4 @@
+from src.nodes.ModuleNode import ModuleNode
 from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 
@@ -9,6 +10,8 @@ class ParserModules(ParserBase):
 
         Объявление нового модуля
         """
+        # TODO: Придумать что-нибудь другое 
+        token_line = self.token.line
 
         self.token.eat(('module', 'declaration'), True)
 
@@ -24,7 +27,7 @@ class ParserModules(ParserBase):
         
         # self.token.next()
 
-        return ModuleNode(module_name, parameters, return_type, statements)
+        return ModuleNode(token_line, module_name, parameters, return_type, statements)
 
     def _parameters(self):
         """
@@ -69,8 +72,9 @@ class ParserModules(ParserBase):
         Обрабатывает оператор возврата значения из модуля, указанный после ключевого слова 'ВОЗВРАТ'.
         Возвращает узел ReturnNode с выражением, представляющим возвращаемое значение.
         """
+        token_line = self.token.line
         self.token.eat(('module', 'return'))
-        return ReturnNode(self.parse_expression())
+        return ReturnNode(token_line, self.parse_expression())
 
     def _exit(self):
         """
@@ -79,8 +83,9 @@ class ParserModules(ParserBase):
         Обрабатывает оператор выхода из модуля, указанный после ключевого слова 'ВЫХОД'.
         Возвращает узел ExitNode.
         """
+        token_line = self.token.line
         self.token.eat('module', 'exit')
-        return ExitNode()
+        return ExitNode(token_line)
 
     def _start(self):
         """

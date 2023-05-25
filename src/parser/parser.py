@@ -1,5 +1,5 @@
 from typing import Optional
-from src.nodes.a import *
+from src.nodes import *
 from src.parser.ParserBase import ParserBase
 from src.parser.ParserModules import ParserModules
 from src.parser.ParserRelations import ParserRelations
@@ -56,11 +56,11 @@ class Parser(ParserBase):
             ("loop", "while_declaration"):          self.loops._while_declaration,
             ("loop", "do_while"):                   self.loops._do_while,
             # ДЕКЛАРАЦИИ ТИПОВ
-            ("type_declaration", "int"):            lambda: self.data._declaration("int"),
-            ("type_declaration", "float"):          lambda: self.data._declaration("float"),
-            ("type_declaration", "logical"):        lambda: self.data._declaration("logical"),
-            ("type_declaration", "symbol"):         lambda: self.data._declaration("symbol"),
-            ("type_declaration", "text"):           lambda: self.data._declaration("text"),
+            ("type_declaration", "int"):            lambda: self.data._declaration("ЦЕЛ"),
+            ("type_declaration", "float"):          lambda: self.data._declaration("ВЕЩ"),
+            ("type_declaration", "logical"):        lambda: self.data._declaration("ЛОГ"),
+            ("type_declaration", "symbol"):         lambda: self.data._declaration("СИМВ"),
+            ("type_declaration", "text"):           lambda: self.data._declaration("ТЕКСТ"),
             ("arr_declaration",):                   lambda: self.data._declaration("text", True),
             # ОТНОШЕНИЯ
             ("relation", "less"):                   self.relations._less,
@@ -89,9 +89,9 @@ class Parser(ParserBase):
     def HANDLERS(self):
         return self._HANDLERS
 
-    def parse(self) -> list:
+    def parse(self) -> tuple[list[ModuleNode], MainNode]:
 
-        modules, main = self.parse_statements()
+        modules, main = self.parse_statements(is_main=True)
 
         # Проверка модуля входа в программу (main)
         if main and not isinstance(main, MainNode):

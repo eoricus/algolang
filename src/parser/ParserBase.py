@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from src.nodes.a import *
+from src.nodes import *
 from src.parser.Token import Token
 
 
@@ -15,7 +15,7 @@ class ParserBase():
     def HANDLERS(self):
         return self.main_instance.HANDLERS
 
-    def _identifier(self, type: TypeDeclarationNode | None = None):
+    def _identifier(self, type=None):
         """
         Переменная
 
@@ -24,10 +24,14 @@ class ParserBase():
 
         TODO: Области видимости
         """
-        a = self.token.value
+
+        identifier_name = self.token.value
+        identifier_line = self.token.line
         self.token.eat(('identifier', ))
-        identifier = IdentifierNode(
-            a, self._assign() if self.token.peek().line == self.token.line else None, type)
+        identifier = IdentifierNode(identifier_line,
+                                    identifier_name,
+                                    self._assign() if self.token.peek().line == self.token.line else None,
+                                    type)
 
         return identifier
 
@@ -89,29 +93,35 @@ class ParserBase():
                 return expr
             elif self.token.key[0] == 'identifier':
                 identifier = self.token.value
+                identifier_line = self.token.line
                 self.token.eat(('identifier',), True)
                 if self.token.key == ("brackets", "open"):
                     self.token.eat(("brackets", "open"), True)
                     arguments = self.parse_expression_list()
                     self.token.eat(("brackets", "close"), True)
-                    return CallNode(identifier, arguments)
+                    return CallNode(identifier_line, identifier, arguments)
                 else:
-                    return IdentifierNode(identifier)
+                    return IdentifierNode(identifier_line, identifier)
             elif self.token.key[1] in ('int', 'float'):
                 token = self.token.value
+                token_line = self.token.line
                 self.token.eat((('data', 'int'), ('data', 'float')), True)
-                return NumberNode(token)
+                return NumberNode(token_line, token)
             elif self.token.key[1] in ('text', 'symbol'):
                 token = self.token.value
+                token_line = self.token.line
                 self.token.eat((('data', 'text'), ('data', 'symbol')), True)
-                return LiteralNode(token)
+                return LiteralNode(token_line, token)
             elif self.token.key == ("io", "input"):
+                # FIXME
+                token_line = self.token.line
                 self.token.eat(("io", "input"), True)
-                return InputNode()
+                return InputNode(token_line)
             elif self.token.key == ("module", "call"):
                 module = self.token.value
+                token_line = self.token.line
                 self.token.eat(("module", "call"), True)
-                return CallNode(module)
+                return CallNode(token_line, module)
             else:
                 self.error(f"Неправильное выражение: {self.token.current}")
 
@@ -122,18 +132,21 @@ class ParserBase():
 
         while self.token.value in current_precedence:
             operator = self.token.current
+            token_line = self.token.line
             self.token.eat(operator.key, True)
 
             right = self.parse_expression(remaining_precedence)
 
             if operator.value in ['+', '-', '*', '/', 'мод']:
-                left = ArithmeticOperationNode(operator.value, left, right)
+                left = ArithmeticOperationNode(
+                    token_line, operator.value, left, right)
             elif operator.value in ['и', 'или']:
-                left = LogicalOperationNode(operator.value, left, right)
+                left = LogicalOperationNode(
+                    token_line, operator.value, left, right)
 
         return left
 
-    def parse_statements(self, stop_token=None) -> list:
+    def parse_statements(self, stop_token=None, is_main=False) -> list:
         """
         TODO:
         """
@@ -161,4 +174,7 @@ class ParserBase():
             else:
                 statements.append(handler())
 
-        return statements, main
+        if is_main:
+            return statements, main
+        else:
+            return statements
