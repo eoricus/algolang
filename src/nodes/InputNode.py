@@ -1,14 +1,13 @@
 import sys
 
-from src.nodes import IdentifierNode
+from src.nodes import IdentifierNode, Identifiers, Node
 
 
-class InputNode():
-    def __init__(self, line: int, identifier: IdentifierNode):
-        self.line = line
+class InputNode(Node):
+    def __init__(self, identifier: IdentifierNode):
         self.identifier = identifier
 
-    def exec(self, globals, locals):
+    def exec(self, globals: Identifiers, locals: Identifiers):
         """
         Непосредственно осуществляет ввод из консоли
 
@@ -27,8 +26,7 @@ class InputNode():
         # for line in sys.stdin.readlines():
         #     value += line
 
-        # TODO: проверить работоспособность
         if (name := self.identifier.name) in globals:
-            globals.set(name, value)
+            globals[name] = globals[name](value)
         else:
-            locals.set(name, value)
+            locals[name] = locals[name](value)

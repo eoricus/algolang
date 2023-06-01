@@ -13,7 +13,7 @@ class Interpreter():
             if module.name in self.globals:
                 self.error("Модуль с таким названием уже существует!")
 
-            self.globals.setModule(module)
+            self.globals[module.name] = module
 
     def run(self):
         """

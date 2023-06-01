@@ -1,17 +1,18 @@
 from src.nodes.ModuleNode import ModuleNode
 from src.nodes.a import *
+from src.nodes.Node import node
 from src.parser.ParserBase import ParserBase
+from src.datatypes import *
 
 
 class ParserModules(ParserBase):
+    @node
     def _declaration(self, module_name=None):
         """
         АЛГ
 
         Объявление нового модуля
         """
-        # TODO: Придумать что-нибудь другое 
-        token_line = self.token.line
 
         self.token.eat(('module', 'declaration'), True)
 
@@ -24,10 +25,8 @@ class ParserModules(ParserBase):
         self._start()
 
         statements = self.parse_statements()
-        
-        # self.token.next()
 
-        return ModuleNode(token_line, module_name, parameters, return_type, statements)
+        return ModuleNode(module_name, parameters, return_type, statements)
 
     def _parameters(self):
         """
@@ -38,16 +37,16 @@ class ParserModules(ParserBase):
         """
 
         self.token.eat(('module', 'parameters'))
-        parameters = []
+        parameters = {}
 
         while (self.token.is_match(('type_declaration',), ('identifier',))):
-            param_type = self.token.value
+            # TODO: перейти к перечислениям вместо словаря, или отлавливанию ошибок
+            param_type = algotypes[self.token.value]
             self.token.eat(('type_declaration',), True)
             param_name = self.token.value
             self.token.eat(('identifier',), True)
-            parameters.append((param_name, param_type))
+            parameters[param_name] = param_type
 
-        # if (self.token.is_match(("module", "start"), ("module", "return_type"))):
         return parameters
 
     def _return_type(self):
@@ -56,38 +55,41 @@ class ParserModules(ParserBase):
 
         Обрабатывает тип возвращаемого значения модуля, указанный после ключевого слова 'НАДО'.
         Возвращает тип возвращаемого значения в виде строки.
+
+        TODO: ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ
         """
 
         return_type = None
         if self.token.eat(('module', 'return_type')):
-            return_type = self.token.value
-            self.token.eat(('type_declaration', ), True)
-        
+            # TODO: хз что делать но как-нибудь упростить
+            return_type = self.main_instance.data._declaration(
+                self.token.value)
+
         return return_type
 
-    def _return(self):
+    @node
+    def _return(self) -> ReturnNode:
         """
         ВОЗВРАТ
 
         Обрабатывает оператор возврата значения из модуля, указанный после ключевого слова 'ВОЗВРАТ'.
         Возвращает узел ReturnNode с выражением, представляющим возвращаемое значение.
         """
-        token_line = self.token.line
         self.token.eat(('module', 'return'))
-        return ReturnNode(token_line, self.parse_expression())
+        return ReturnNode(self.parse_expression())
 
-    def _exit(self):
+    @node
+    def _exit(self) -> ExitNode:
         """
         ВЫХОД
 
         Обрабатывает оператор выхода из модуля, указанный после ключевого слова 'ВЫХОД'.
         Возвращает узел ExitNode.
         """
-        token_line = self.token.line
         self.token.eat('module', 'exit')
-        return ExitNode(token_line)
+        return ExitNode()
 
-    def _start(self):
+    def _start(self) -> None:
         """
         НАЧ
 
@@ -96,7 +98,7 @@ class ParserModules(ParserBase):
         """
         self.token.eat(('module', 'start'), True)
 
-    def _end(self):
+    def _end(self) -> None:
         """
         КОН
 
@@ -105,5 +107,8 @@ class ParserModules(ParserBase):
         """
         self.token.eat(('module', 'end'), True)
 
-    def _call(self):
+    def _call(self) -> None:
+        """
+        TODO
+        """
         self.token.eat(('module', 'call'), True)

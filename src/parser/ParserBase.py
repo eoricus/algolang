@@ -1,6 +1,8 @@
 from typing import Any, Optional
 from src.nodes import *
+from src.nodes.Node import node
 from src.parser.Token import Token
+from src.datatypes import *
 
 
 class ParserBase():
@@ -15,25 +17,29 @@ class ParserBase():
     def HANDLERS(self):
         return self.main_instance.HANDLERS
 
+    @node
     def _identifier(self, type=None):
         """
-        Переменная
+        ПЕРЕМЕННАЯ
 
-        Возвращает узел переменной, и если есть присваивание, то 
+        Вызывается при обнаружении лексем, которых нет в списке 
+        ключевых слов. Поведение идентификатора обрабатывается 
+        в самом объекте класса.
+
+        :param type: Тип
+        :return: The
+
+        Возвращает IdentifierNode (узел), и если есть присваивание, то 
         присваивает его
 
         TODO: Области видимости
         """
 
         identifier_name = self.token.value
-        identifier_line = self.token.line
         self.token.eat(('identifier', ))
-        identifier = IdentifierNode(identifier_line,
-                                    identifier_name,
-                                    self._assign() if self.token.peek().line == self.token.line else None,
-                                    type)
-
-        return identifier
+        return IdentifierNode(identifier_name,
+                              self._assign() if self.token.peek().line == self.token.line else None,
+                              type)
 
     def _assign(self):
         """
@@ -51,10 +57,12 @@ class ParserBase():
         """
         Выводит ошибку
 
-        TODO форматирование ошибок, вывод позиции и строки
+        TODO УБРАТЬ НАХУЙ
         """
         raise SyntaxError(str)
 
+    # TODO TODO TODO TODO TODO TODO
+    # Отдельный узел для параметров вызова
     def parse_expression_list(self):
         """
         Parses a list of expressions separated by commas.
@@ -74,54 +82,68 @@ class ParserBase():
 
         return expressions
 
+    @node
     def parse_expression(self, precedence: tuple = (('+', '-'), ('*', '/', 'мод'), ('<', '>', '<=', '>=', '==', '<>'))):
         """
         TODO
         """
 
         if not precedence:
-            if self.token.key == ("brackets", "open"):
+            if self.token.is_match(("brackets", "open")):
                 self.token.eat(("brackets", "open"), True)
-                # change here to parse full expression without precedence
                 expr = self.parse_expression()
                 self.token.eat(("brackets", "close"), True)
                 return expr
-            elif self.token.key == ("sq_brackets", "open"):
+
+            elif self.token.is_match(("sq_brackets", "open")):
                 self.token.eat(("sq_brackets", "open"), True)
                 expr = self.parse_expression_list()
                 self.token.eat(("sq_brackets", "close"), True)
                 return expr
-            elif self.token.key[0] == 'identifier':
+
+            elif self.token.is_match(('identifier',)):
+                # TODO
                 identifier = self.token.value
-                identifier_line = self.token.line
                 self.token.eat(('identifier',), True)
                 if self.token.key == ("brackets", "open"):
                     self.token.eat(("brackets", "open"), True)
                     arguments = self.parse_expression_list()
                     self.token.eat(("brackets", "close"), True)
-                    return CallNode(identifier_line, identifier, arguments)
+                    return CallNode(identifier, arguments)
                 else:
-                    return IdentifierNode(identifier_line, identifier)
-            elif self.token.key[1] in ('int', 'float'):
-                token = self.token.value
-                token_line = self.token.line
-                self.token.eat((('data', 'int'), ('data', 'float')), True)
-                return NumberNode(token_line, token)
-            elif self.token.key[1] in ('text', 'symbol'):
-                token = self.token.value
-                token_line = self.token.line
-                self.token.eat((('data', 'text'), ('data', 'symbol')), True)
-                return LiteralNode(token_line, token)
+                    return IdentifierNode(identifier)
+
+            elif self.token.is_match(('data', 'int')):
+                param: Token = self.token.current
+                self.token.eat(('data', 'int'), True)
+                return Integer(param.value)
+
+            elif self.token.is_match(('data', 'float')):
+                param: Token = self.token.current
+                self.token.eat(('data', 'float'), True)
+                return RealNumber(param.value)
+
+            elif self.token.is_match(('data', 'symbol')):
+                param: Token = self.token.current
+                self.token.eat((('data', 'symbol')), True)
+                return Literal(param.value)
+
+            elif self.token.is_match(('data', 'text')):
+                param: Token = self.token.current
+                self.token.eat((('data', 'text')), True)
+                return Text(param.value)
+
             elif self.token.key == ("io", "input"):
                 # FIXME
-                token_line = self.token.line
                 self.token.eat(("io", "input"), True)
-                return InputNode(token_line)
+                return InputNode()
+            
             elif self.token.key == ("module", "call"):
+                # TODO
                 module = self.token.value
-                token_line = self.token.line
                 self.token.eat(("module", "call"), True)
-                return CallNode(token_line, module)
+                return CallNode(module)
+            
             else:
                 self.error(f"Неправильное выражение: {self.token.current}")
 
@@ -132,17 +154,16 @@ class ParserBase():
 
         while self.token.value in current_precedence:
             operator = self.token.current
-            token_line = self.token.line
             self.token.eat(operator.key, True)
 
             right = self.parse_expression(remaining_precedence)
 
             if operator.value in ['+', '-', '*', '/', 'мод']:
                 left = ArithmeticOperationNode(
-                    token_line, operator.value, left, right)
+                    operator.value, left, right)
             elif operator.value in ['и', 'или']:
                 left = LogicalOperationNode(
-                    token_line, operator.value, left, right)
+                    operator.value, left, right)
 
         return left
 

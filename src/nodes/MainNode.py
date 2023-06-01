@@ -1,7 +1,8 @@
+from src.nodes import Node
 from .Identifiers import Identifiers
 
 
-class MainNode():
+class MainNode(Node):
     def __init__(self, statements):
         self.statements = statements
 

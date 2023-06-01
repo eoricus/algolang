@@ -1,18 +1,19 @@
 from src.nodes import *
+from src.nodes.Node import node
 from src.parser.ParserBase import ParserBase
 
 
 class ParserIO(ParserBase):
+    @node
     def _input(self):
-        token_line = self.token.line
         self.token.eat(('io', 'input'), True)
         if isinstance(expr := self.parse_expression(), IdentifierNode):
-            return InputNode(token_line, expr)
+            return InputNode(expr)
         else:
             raise SyntaxError("Ожидалась переменная")
 
+    @node
     def _output(self):
-        token_line = self.token.line
         self.token.eat(('io', 'output'), True)
         expr = self.parse_expression()
-        return OutputNode(token_line, expr)
+        return OutputNode(expr)

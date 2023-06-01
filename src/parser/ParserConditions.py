@@ -1,8 +1,10 @@
+from src.nodes.Node import node
 from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 
 
 class ParserConditions(ParserBase):
+    @node
     def _if_declaration(self):
         """
         ЕСЛИ
@@ -11,7 +13,6 @@ class ParserConditions(ParserBase):
         слова 'ЕСЛИ'. Возвращает узел IfNode с условием и блоками 
         кода для ветвей 'ТО' и 'ИНАЧЕ'.
         """
-        token_line = self.token.line
 
         # ЕСЛИ
         self.token.eat(('condition', 'if_declaration'))
@@ -21,18 +22,19 @@ class ParserConditions(ParserBase):
         self.token.eat(('condition', 'if_start'))
         # Блок если
         true_block = self.parse_statements()
-        false_block = self.parse_statements() if self.token.eat(('condition', 'else')) else None
+        false_block = self.parse_statements() if self.token.eat(
+            ('condition', 'else')) else None
 
         self.token.next()
 
-        return ConditionNode(token_line, condition, true_block, false_block)
+        return ConditionNode(condition, true_block, false_block)
 
+    @node
     def _switch_declaration(self):
         """
         ВЫБОР
 
         """
-        token_line = self.token.line
 
         # ВЫБОР
         self.token.eat(('condition', 'switch_declaration'))
@@ -44,13 +46,13 @@ class ParserConditions(ParserBase):
             case_node = self._case_declaration()
             cases.append(case_node)
 
-        return SwitchNode(token_line, reference, cases)
+        return SwitchNode(reference, cases)
 
+    @node
     def _case_declaration(self):
         """
         КОГДА
         """
-        token_line = self.token.line
 
         # КОГДА
         self.token.eat(('condition', 'case_declaration'))
@@ -63,4 +65,4 @@ class ParserConditions(ParserBase):
 
         self.token.next()
 
-        return CaseNode(token_line, case_condition, case_block)
+        return CaseNode(case_condition, case_block)

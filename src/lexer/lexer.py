@@ -83,7 +83,7 @@ class Lexer():
         """
         Проверка корректности числа
         """
-
+        # TODO:CHANGE TO REAL NUMBER
         if re.match(r'^[-+]?\d+(\.\d*)?$', value):
             return "float" if '.' in value else "int"
         elif re.match(r'^[-+]?\.\d+$', value):

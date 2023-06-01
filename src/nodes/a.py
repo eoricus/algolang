@@ -1,11 +1,11 @@
-class Node:
-    pass
+# МУСОРКА
+# TODO: Убрать все классы отсюда
 
-# CONDITIONS:
+from src.nodes.Node import Node
 
 
 class CaseNode:
-    def __init__(self, line, condition, block):
+    def __init__(self, condition, block):
         self.condition = condition
         self.block = block
 
@@ -29,51 +29,51 @@ class ConditionNode(Node):
     )
     """
 
-    def __init__(self, line, condition_expr, if_true_statements, if_false_statements=None):
+    def __init__(self, condition_expr, if_true_statements, if_false_statements=None):
         self.condition_expr = condition_expr
         self.if_true_statements = if_true_statements
         self.if_false_statements = if_false_statements or []
 
 
 class SwitchNode:
-    def __init__(self, line, cases):
+    def __init__(self, cases):
         self.cases = cases
 
 # TYPE DECLARATIONS:
 
 
 class TypeDeclarationNode():
-    def __init__(self, line, identifier_node):
+    def __init__(self, identifier_node):
         self.identifier_node = identifier_node
 
 
 class TypeDeclarationIntNode(TypeDeclarationNode):
-    def __init__(self, line, identifier_node):
+    def __init__(self, identifier_node):
         super().__init__(identifier_node)
 
 
 class TypeDeclarationFloatNode(TypeDeclarationNode):
-    def __init__(self, line, identifier_node):
+    def __init__(self, identifier_node):
         super().__init__(identifier_node)
 
 
 class TypeDeclarationLogicalNode(TypeDeclarationNode):
-    def __init__(self, line, identifier_node):
+    def __init__(self, identifier_node):
         super().__init__(identifier_node)
 
 
 class TypeDeclarationSymbolNode(TypeDeclarationNode):
-    def __init__(self, line, identifier_node):
+    def __init__(self, identifier_node):
         super().__init__(identifier_node)
 
 
 class TypeDeclarationTextNode(TypeDeclarationNode):
-    def __init__(self, line, identifier_node):
+    def __init__(self, identifier_node):
         super().__init__(identifier_node)
 
 
 class TypeDeclarationArrayNode(TypeDeclarationNode):
-    def __init__(self, line, identifier_node, TypeDeclaration, values=None):
+    def __init__(self, identifier_node, TypeDeclaration, values=None):
         super().__init__(identifier_node)
         self.TypeDeclaration = TypeDeclaration
         self.values = values or []
@@ -81,39 +81,42 @@ class TypeDeclarationArrayNode(TypeDeclarationNode):
 
 
 # class IdentifierNode():
-#     def __init__(self, line, name, expression=None, type=None):
+#     def __init__(self, name, expression=None, type=None):
 #         self.name = name
 #         self.expression = expression
 #         self.type = type
 
 
-class LiteralNode(Node):
-    """
-    Строковое значение
-    """
+# class LiteralNode(Node):
+#     """
+#     Строковое значение
+#     """
 
-    def __init__(self, line, value):
-        self.value = value
+#     def __init__(self, value):
+#         self.value = value
 
 
-class NumberNode(Node):
-    """
-    Числовое значение
-    """
+# class NumberNode(Node):
+#     """
+#     Числовое значение
+#     """
 
-    def __init__(self, line, value):
-        self.value = value
+#     def __init__(self, value):
+#         self.value = value
 
 
 class BinaryOperationNode(Node):
-    def __init__(self, line, operator, left, right):
+    def __init__(self, operator, left, right):
         self.operator = operator
         self.left = left
         self.right = right
 
 
 class ArithmeticOperationNode(BinaryOperationNode):
-    pass
+    def __init__(self, operator, left, right):
+        self.operator = operator
+        self.left = left
+        self.right = right
 
 
 class LogicalOperationNode(BinaryOperationNode):
@@ -140,7 +143,7 @@ class ForLoopNode(Node):
     )
     """
 
-    def __init__(self, line, variable, n, statements, step=None):
+    def __init__(self, variable, n, statements, step=None):
         self.variable = variable
         self.n = n
         self.statements = statements
@@ -163,7 +166,7 @@ class WhileLoopNode(Node):
     )
     """
 
-    def __init__(self, line, condition_expr, loop_statements, do=False):
+    def __init__(self, condition_expr, loop_statements, do=False):
         self.condition_expr = condition_expr
         self.loop_statements = loop_statements
         self.do = do
@@ -188,42 +191,39 @@ class ReturnNode(Node):
 
     pass
 
-    def __init__(self, line, expression):
+    def __init__(self, expression):
         self.expression = expression
 
 
-class IntNode(Node):
-    def __init__(self, line, value):
-        self.value = value
+# class IntNode(Node):
+#     def __init__(self, value):
+#         self.value = value
 
 
-class FloatNode(Node):
-    def __init__(self, line, value):
-        self.value = value
+# class FloatNode(Node):
+#     def __init__(self, value):
+#         self.value = value
 
 
-class LogicalNode(Node):
-    def __init__(self, line, value):
-        self.value = value
+# class LogicalNode(Node):
+#     def __init__(self, value):
+#         self.value = value
 
 
-class CallNode(Node):
-    def __init__(self, line, name, arguments):
-        self.name = name
-        self.arguments = arguments
+# class CallNode(Node):
+#     def __init__(self, name, arguments):
+#         self.name = name
+#         self.arguments = arguments
 
 
 class InputNode(Node):
-    def __init__(self, line, expr):
+    def __init__(self, expr):
         print("expr")
     pass
 
 
-
-
-
 # class ModuleNode(Node):
-#     def __init__(self, line, name, parameters, return_type, body_statements):
+#     def __init__(self, name, parameters, return_type, body_statements):
 #         self.name = name
 #         self.parameters = parameters
 #         self.return_type = return_type
@@ -231,7 +231,7 @@ class InputNode(Node):
 
 
 # class MainNode(Node):
-#     def __init__(self, line, statements ):
+#     def __init__(self, statements ):
 #         self.statements = statements
 
 #     def exec(self, globals: dict):
@@ -242,5 +242,5 @@ class InputNode(Node):
 
 
 class TypeDeclarationNode(Node):
-    def __init__(self, line, type, is_arr):
+    def __init__(self, type, is_arr):
         pass

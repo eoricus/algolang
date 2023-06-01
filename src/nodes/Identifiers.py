@@ -1,46 +1,31 @@
+from src.nodes.ModuleNode import ModuleNode
+from src.datatypes import *
+
+
 class Identifiers():
-    # _instance = None
-
-    # def __new__(cls, *args, **kwargs):
-    #     if not cls._instance:
-    #         cls._instance = super().__new__(cls, *args, **kwargs)
-    #     return cls._instance
-
     def __init__(self):
         self.variables = {}
 
-    def __contains__(self, item) -> bool:
+    def __contains__(self, key) -> bool:
         """
         Проверка на наличие переменной
         """
-        return item in self.variables.keys()
+        return key in self.variables.keys()
 
-    def set(self, name, expr):
+    def __getitem__(self, key):
         """
-        TODO
+        Получение значений из стека переменных
         """
-        self.variables[name] = type(self.variables[name])(
-            expr) if name in self.variables else expr
+        return self.variables[key]
 
-    def setModule(self, module):
+    def __setitem__(self, key, value):
         """
-        FIXME: убрать этот класс, и добавить тип для модулей
+        Назначение значений для переменных
         """
-        self.variables[module.name] = module
+        self.variables[key] = value
 
-    def get(self, name):
+    def __delitem__(self, key):
         """
-        TODO
+        Удаление переменных
         """
-
-        return self.variables.get(name)
-
-    def rem(self, name):
-        """
-        TODO
-        """
-        if name in self.variables:
-            del (self.variables[name])
-            return True
-        else:
-            return False
+        del self.variables[key]

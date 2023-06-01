@@ -1,9 +1,11 @@
 from src.nodes.MainNode import MainNode
+from src.nodes.Node import node
 from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 
 
 class ParserGlobals(ParserBase):
+    @node
     def _start(self):
         """
         НАЧАЛО

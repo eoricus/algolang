@@ -1,14 +1,15 @@
 from src.nodes.a import *
+from src.nodes.Node import node
 from src.parser.ParserBase import ParserBase
 
 
 class ParserLoops(ParserBase):
+    @node
     def _for_declaration(self):
         """
         ДЛЯ
+        TODO: ОПИСАНИЕ
         """
-        token_line = self.token.line
-
 
         self.token.eat(('loop', 'for_declaration'), True)
 
@@ -24,24 +25,32 @@ class ParserLoops(ParserBase):
 
         self.token.next()
 
-        return ForLoopNode(token_line, var, num, statements, step)
+        return ForLoopNode(var, num, statements, step)
 
     def _for_end_of_range(self) -> None:
         """
         ПО
+
+        TODO: ОПИСАНИЕ
         """
+        
         self.token.eat(('loop', "for_end_of_range"), True)
 
     def _for_step(self):
         """
         ШАГ
+
+        TODO: ОПИСАНИЕ
         """
 
         return self.parse_expression() if self.token.eat(("loop", "for_step")) else None
 
+    @node
     def _while_declaration(self):
         """
         ПОКА
+
+        TODO: ОПИСАНИЕ
         """
         self.token.eat(('loop', 'while_declaration'), True)
         condition = self.parse_expression()
@@ -50,8 +59,9 @@ class ParserLoops(ParserBase):
 
         self.token.next()
 
-        return WhileLoopNode(token_line, condition, statements)
+        return WhileLoopNode(condition, statements)
 
+    @node
     def _do_while(self):
         """
         ВЫПОЛНЯТЬ ... ПОКА
@@ -62,4 +72,4 @@ class ParserLoops(ParserBase):
         expression = self.parse_expression()
 
         self.token.next()
-        return WhileLoopNode(token_line, statements, expression, True)
+        return WhileLoopNode(statements, expression, True)
