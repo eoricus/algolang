@@ -1,4 +1,3 @@
-from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 
 

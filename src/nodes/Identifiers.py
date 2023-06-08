@@ -1,7 +1,3 @@
-from src.nodes.ModuleNode import ModuleNode
-from src.datatypes import *
-
-
 class Identifiers():
     def __init__(self):
         self.variables = {}
@@ -16,7 +12,7 @@ class Identifiers():
         """
         Получение значений из стека переменных
         """
-        return self.variables[key]
+        return self.variables.get(key)
 
     def __setitem__(self, key, value):
         """

@@ -1,5 +1,5 @@
+from src.nodes import CaseNode, ConditionNode, SwitchNode
 from src.nodes.Node import node
-from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 
 

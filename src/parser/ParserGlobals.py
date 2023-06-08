@@ -1,6 +1,5 @@
-from src.nodes.MainNode import MainNode
+from src.nodes.module.MainNode import MainNode
 from src.nodes.Node import node
-from src.nodes.a import *
 from src.parser.ParserBase import ParserBase
 
 
@@ -26,5 +25,4 @@ class ParserGlobals(ParserBase):
 
         Обрабатывает конец тела основной функции
         """
-        pass
-        # self.token.eat(('module', 'end'), True)
+        self.token.eat(('module', 'end'), True)

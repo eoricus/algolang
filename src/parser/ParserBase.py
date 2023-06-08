@@ -1,8 +1,8 @@
 from typing import Any, Optional
 from src.nodes import *
 from src.nodes.Node import node
+from src.nodes.char import char
 from src.parser.Token import Token
-from src.datatypes import *
 
 
 class ParserBase():
@@ -31,8 +31,6 @@ class ParserBase():
 
         Возвращает IdentifierNode (узел), и если есть присваивание, то 
         присваивает его
-
-        TODO: Области видимости
         """
 
         identifier_name = self.token.value
@@ -53,138 +51,138 @@ class ParserBase():
         else:
             return None
 
-    def error(self, str):
-        """
-        Выводит ошибку
-
-        TODO УБРАТЬ НАХУЙ
-        """
-        raise SyntaxError(str)
-
-    # TODO TODO TODO TODO TODO TODO
-    # Отдельный узел для параметров вызова
-    def parse_expression_list(self):
-        """
-        Parses a list of expressions separated by commas.
-
-        Returns a list of expression nodes.
-        """
-        expressions = []
-
-        # check if there's at least one expression
-        if self.token.key != ("brackets", "close"):
-            expressions.append(self.parse_expression())
-
-        # while the next token is a comma
-        while self.token.key == ("comma",):
-            self.token.eat(("comma",), True)
-            expressions.append(self.parse_expression())
-
-        return expressions
-
     @node
-    def parse_expression(self, precedence: tuple = (('+', '-'), ('*', '/', 'мод'), ('<', '>', '<=', '>=', '==', '<>'))):
+    def parse_expression(self):
         """
-        TODO
+        Метод разбирает выражения
+
+        Результатом работы метода могут быть как типы данных, так
+        и узлы, например ArithmeticOperationNode, LogicalOperationNode
+        или же CallNode, InputNode, IdentifierNode.
+
+        Также выражение может возвращать список этих значений
         """
 
-        if not precedence:
-            if self.token.is_match(("brackets", "open")):
-                self.token.eat(("brackets", "open"), True)
-                expr = self.parse_expression()
-                self.token.eat(("brackets", "close"), True)
-                return expr
+        # Ниже перечислены методы .eat, т.к. в случае если
+        # токен есть нам надо его пропустить
 
-            elif self.token.is_match(("sq_brackets", "open")):
-                self.token.eat(("sq_brackets", "open"), True)
-                expr = self.parse_expression_list()
-                self.token.eat(("sq_brackets", "close"), True)
-                return expr
+        # Внутри круглых скобок могут находиться любые выражения
+        if self.token.eat(("brackets", "open")):
+            expr = self.parse_expression()
+            self.token.eat(("brackets", "close"), True)
+            return expr
 
-            elif self.token.is_match(('identifier',)):
-                # TODO
-                identifier = self.token.value
-                self.token.eat(('identifier',), True)
-                if self.token.key == ("brackets", "open"):
-                    self.token.eat(("brackets", "open"), True)
-                    arguments = self.parse_expression_list()
-                    self.token.eat(("brackets", "close"), True)
-                    return CallNode(identifier, arguments)
-                else:
-                    return IdentifierNode(identifier)
+        # Внутри квадратных скобок могут находиться только
+        # массивы или списки
+        if self.token.eat(("sq_brackets", "open")):
+            expr = []
 
-            elif self.token.is_match(('data', 'int')):
-                param: Token = self.token.current
-                self.token.eat(('data', 'int'), True)
-                return Integer(param.value)
+            # Пока следующий токен запятая
+            while self.token.eat(("comma",)):
+                expr.append(self.parse_expression())
 
-            elif self.token.is_match(('data', 'float')):
-                param: Token = self.token.current
-                self.token.eat(('data', 'float'), True)
-                return RealNumber(param.value)
+            self.token.eat(("sq_brackets", "close"), True)
 
-            elif self.token.is_match(('data', 'symbol')):
-                param: Token = self.token.current
-                self.token.eat((('data', 'symbol')), True)
-                return Literal(param.value)
+            return expr
 
-            elif self.token.is_match(('data', 'text')):
-                param: Token = self.token.current
-                self.token.eat((('data', 'text')), True)
-                return Text(param.value)
+        # Внутри фигурных скобок могут находиться арифметические выражения
+        #
+        # Возвращает ArithmeticOperationNode
+        if self.token.eat(("arith_brackets", "open")):
+            expr = []
 
-            elif self.token.key == ("io", "input"):
-                # FIXME
-                self.token.eat(("io", "input"), True)
-                return InputNode()
-            
-            elif self.token.key == ("module", "call"):
-                # TODO
-                module = self.token.value
-                self.token.eat(("module", "call"), True)
-                return CallNode(module)
-            
+            while not self.token.eat(("arith_brackets", "close")):
+                expr.append(self.parse_expression())
+
+            return ArithmeticOperationNode(expr)
+
+        # Арифметические выражения
+        if self.token.is_match(("arithmetic",)):
+            expr = self.token.key[1]
+            self.token.eat(("arithmetic",), True)
+            return ArithmeticOperator(expr)
+
+        # Внутри треугольных скобок могут находиться логические выражения
+        #
+        # Возвращает LogicalOperationNode
+        if self.token.eat(("log_brackets", "open")):
+            expr = []
+
+            while not self.token.eat(('log_brackets', 'close')):
+                expr.append(self.parse_expression())
+
+            return LogicalOperationNode(expr)
+
+        # Логические выражения
+        if self.token.is_match(("logical",)):
+            expr = self.token.key[1]
+            self.token.eat(("logical",), True)
+            return LogicalOperator(expr)
+
+        # Вызов метода
+        #
+        # Возвращает CallNode
+        if self.token.is_match(("module", "call")):
+            expr = CallNode(self.token.value)
+            self.token.eat(("module", "call"), True)
+            return expr
+
+        # Ввод из консоли
+        #
+        # Возвращает InputNode
+        if self.token.eat(("io", "input")):
+            return InputNode()
+
+        # Данные
+        #
+        # Возвращает объект типа данных
+        if self.token.is_match(("data",)):
+            data = self.token.current
+            self.token.eat(("data",), True)
+
+            if data.key[1] in ALGOTYPES.values():
+                return data.key[1](data.value)
             else:
-                self.error(f"Неправильное выражение: {self.token.current}")
+                raise ValueError("НЕИЗВЕСТНЫЙ ТИП ДАННЫХ")
 
-        current_precedence = precedence[0]
-        remaining_precedence = precedence[1:]
+        # Идентификаторы
+        #
+        # Возвращает объект вызова метода, или идентификатор
+        if self.token.is_match(("identifier",)):
+            identifier = self.token.value
+            self.token.eat(('identifier',), True)
 
-        left = self.parse_expression(remaining_precedence)
+            if self.token.eat(("brackets", "open")):
+                arguments = []
 
-        while self.token.value in current_precedence:
-            operator = self.token.current
-            self.token.eat(operator.key, True)
+                # Пока следующий токен запятая
+                while True:
+                    if (res := self.parse_expression()) is not None:
+                        arguments.append(res)
+                    if not self.token.eat(("comma",)):
+                        break
 
-            right = self.parse_expression(remaining_precedence)
+                self.token.eat(("brackets", "close"), True)
+                return CallNode(identifier, arguments)
 
-            if operator.value in ['+', '-', '*', '/', 'мод']:
-                left = ArithmeticOperationNode(
-                    operator.value, left, right)
-            elif operator.value in ['и', 'или']:
-                left = LogicalOperationNode(
-                    operator.value, left, right)
-
-        return left
+            return IdentifierNode(identifier)
 
     def parse_statements(self, stop_token=None, is_main=False) -> list:
         """
-        TODO:
+        Обрабатывает все выражения внутри одного уровня табуляции
         """
         statements: list = []
         indent_level: int = self.token.indent
         main: Optional[MainNode] = None
 
         while (self.token.index < len(self.token) and self.token.indent >= indent_level):
-            if ((stop_token
-                and self.token.is_match((stop_token, ('module', 'end'))))
-                    or (type(self.token.key) != tuple)):
+            if (type(self.token.key) != tuple):
+                break
+            if stop_token and self.token.is_match(stop_token):
                 break
 
             handler: function | None = self.HANDLERS.get(self.token.key)
 
-            # TODO: Сделать функцию декоратор для всех методов, которые
-            #       должны сдвигать указатель токена вперед
             if handler is None:
                 if (self.token.key[0] == "data"):
                     self.parse_expression()
@@ -193,7 +191,9 @@ class ParserBase():
             if self.token.is_match(("global", "start")):
                 main = handler()
             else:
-                statements.append(handler())
+                res = handler()
+                if res is not None:
+                    statements.append(res)
 
         if is_main:
             return statements, main

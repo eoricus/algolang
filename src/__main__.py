@@ -2,7 +2,6 @@ from pprint import pprint
 import sys
 
 from .lexer import Lexer
-# FIXME
 from .parser.Parser import Parser
 
 from .interpreter.interpreter import Interpreter

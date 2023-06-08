@@ -1,8 +1,7 @@
-from src.nodes.ModuleNode import ModuleNode
-from src.nodes.a import *
+from src.nodes.algotypes import ALGOTYPES
+from src.nodes.module.ModuleNode import ExitNode, ModuleNode, ReturnNode
 from src.nodes.Node import node
 from src.parser.ParserBase import ParserBase
-from src.datatypes import *
 
 
 class ParserModules(ParserBase):
@@ -40,8 +39,7 @@ class ParserModules(ParserBase):
         parameters = {}
 
         while (self.token.is_match(('type_declaration',), ('identifier',))):
-            # TODO: перейти к перечислениям вместо словаря, или отлавливанию ошибок
-            param_type = algotypes[self.token.value]
+            param_type = ALGOTYPES[self.token.value]
             self.token.eat(('type_declaration',), True)
             param_name = self.token.value
             self.token.eat(('identifier',), True)
@@ -55,13 +53,10 @@ class ParserModules(ParserBase):
 
         Обрабатывает тип возвращаемого значения модуля, указанный после ключевого слова 'НАДО'.
         Возвращает тип возвращаемого значения в виде строки.
-
-        TODO: ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ
         """
 
         return_type = None
         if self.token.eat(('module', 'return_type')):
-            # TODO: хз что делать но как-нибудь упростить
             return_type = self.main_instance.data._declaration(
                 self.token.value)
 
@@ -109,6 +104,6 @@ class ParserModules(ParserBase):
 
     def _call(self) -> None:
         """
-        TODO
+        Обрабатывает вызовы методов (просто сдвигает указатель токена вперед)
         """
         self.token.eat(('module', 'call'), True)

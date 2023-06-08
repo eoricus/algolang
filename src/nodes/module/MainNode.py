@@ -1,5 +1,6 @@
 from src.nodes import Node
-from .Identifiers import Identifiers
+from src.nodes.module.ModuleNode import ExitNode, ReturnNode
+from ..Identifiers import Identifiers
 
 
 class MainNode(Node):
@@ -14,6 +15,11 @@ class MainNode(Node):
                         списка в интерпретаторе
         """
         for statement in self.statements:
-            statement.exec(globals, globals)
-            # if result is not None:
-            #     globals.append(result)
+            res = statement.exec(globals, globals)
+
+            # Выход из модуля
+            if isinstance(res, ExitNode):
+                return
+            # Возвращаение значения из модуля
+            if isinstance(res, ReturnNode):
+                return res.exec(globals, locals)

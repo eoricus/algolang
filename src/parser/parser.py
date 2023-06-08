@@ -1,5 +1,6 @@
 from typing import Optional
 from src.nodes import *
+from src.nodes.char import char
 from src.parser.ParserBase import ParserBase
 from src.parser.ParserModules import ParserModules
 from src.parser.ParserRelations import ParserRelations
@@ -56,12 +57,12 @@ class Parser(ParserBase):
             ("loop", "while_declaration"):          self.loops._while_declaration,
             ("loop", "do_while"):                   self.loops._do_while,
             # ДЕКЛАРАЦИИ ТИПОВ
-            ("type_declaration", "int"):            lambda: self.data._declaration("ЦЕЛ"),
-            ("type_declaration", "float"):          lambda: self.data._declaration("ВЕЩ"),
-            ("type_declaration", "logical"):        lambda: self.data._declaration("ЛОГ"),
-            ("type_declaration", "symbol"):         lambda: self.data._declaration("СИМВ"),
-            ("type_declaration", "text"):           lambda: self.data._declaration("ТЕКСТ"),
-            ("arr_declaration",):                   lambda: self.data._declaration("text", True),
+            ("type_declaration", int):              lambda: self.data._declaration("ЦЕЛ"),
+            ("type_declaration", float):            lambda: self.data._declaration("ВЕЩ"),
+            ("type_declaration", bool):             lambda: self.data._declaration("ЛОГ"),
+            ("type_declaration", char):             lambda: self.data._declaration("СИМВ"),
+            ("type_declaration", str):              lambda: self.data._declaration("ТЕКСТ"),
+            ("arr_declaration", list):              lambda: self.data._declaration("text", True),
             # ОТНОШЕНИЯ
             ("relation", "less"):                   self.relations._less,
             ("relation", "more"):                   self.relations._more,
@@ -94,7 +95,7 @@ class Parser(ParserBase):
         modules, main = self.parse_statements(is_main=True)
 
         # Проверка модуля входа в программу (main)
-        if main and not isinstance(main, MainNode):
+        if not isinstance(main, MainNode):
             self.error(
                 "Неправильно определен основной модуль программы (точка входа)")
         # Проверка полученных модулей

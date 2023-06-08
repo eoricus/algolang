@@ -1,10 +1,11 @@
 import re
-from typing import Literal
+
+from src.nodes.char import char
 
 
 class Lexer():
     """
-    TODO
+    Класс программы, разбивающий исходный код на лексемы
     """
 
     def __init__(self) -> None:
@@ -13,7 +14,7 @@ class Lexer():
         """
 
         self.keywords = {
-            # Объявление модуля
+            #   ДЕКЛАРАЦИЯ МОДУЛЯ
             "АЛГ":      ("module", "declaration"),
             "ДАНО":     ("module", "parameters"),
             "НАДО":     ("module", "return_type"),
@@ -21,60 +22,75 @@ class Lexer():
             "ВЫХОД":    ("module", "exit"),
             "НАЧ":      ("module", "start"),
             "КОН":      ("module", "end"),
-            # Вход программы
+
+            #   ВХОД И ВЫХОД ПРОГРАММЫ
             "НАЧАЛО":   ("global", "start"),
             "КОНЕЦ":    ("global", "end"),
-            # Условия
+
+            #   УСЛОВНЫЕ ОПЕРАТОРЫ
             "ЕСЛИ":     ("condition", "if_declaration"),
             "ТО":       ("condition", "if_start"),
             "ИНАЧЕ":    ("condition", "else"),
             "ВЫБОР":    ("condition", "switch_declaration"),
             "КОГДА":    ("condition", "case_declaration"),
-            # Циклы
+
+            #   ЦИКЛЫ
             "ДЛЯ":      ("loop", "for_declaration"),
             "ПО":       ("loop", "for_end_of_range"),
             "ШАГ":      ("loop", "for_step"),
             "ПОКА":     ("loop", "while_declaration"),
             "ВЫПОЛНЯТЬ": ("loop", "do_while"),
-            # Типы данных
-            "ЦЕЛ":      ("type_declaration", "int"),
-            "ВЕЩ":      ("type_declaration", "float"),
-            "ЛОГ":      ("type_declaration", "logical"),
-            "СИМВ":     ("type_declaration", "symbol"),
-            "ТЕКСТ":    ("type_declaration", "text"),
-            "МАССИВ":   ("arr_declaration",),
-            # Значения
+
+            #   ТИПЫ ДАННЫХ
+            "ЦЕЛ":      ("type_declaration", int),
+            "ВЕЩ":      ("type_declaration", float),
+            "ЛОГ":      ("type_declaration", bool),
+            "СИМВ":     ("type_declaration", char),
+            "ТЕКСТ":    ("type_declaration", str),
+            "МАССИВ":   ("arr_declaration",  list[str]),
+
+            #   ЛОГИЧЕСКИЕ ЗНАЧЕНИЯ
             "ЛОЖЬ":     ("data", "logical"),
             "ИСТИНА":   ("data", "logical"),
-            # Арифметические операции
+
+            #   ОПЕРАЦИИ
+            # арифметические операторы
             "+":        ("arithmetic", "add"),
             "-":        ("arithmetic", "sub"),
             "*":        ("arithmetic", "mpy"),
             "/":        ("arithmetic", "div"),
             "^":        ("arithmetic", "pow"),
             "мод":      ("arithmetic", "mod"),
-            # Сравнительные операции
-            "<":        ("relation", "less"),
-            ">":        ("relation", "more"),
-            "<=":       ("relation", "less_or_equal"),
-            ">=":       ("relation", "more_or_equal"),
-            "==":       ("relation", "equal"),
-            "<>":       ("relation", "not_equal"),
-            # Присваивание
-            ":=":       ("assignment", "assign"),
-            # Логические операции
+            # сравнительные операторы
+            "<":        ("logical", "less"),
+            ">":        ("logical", "more"),
+            "<=":       ("logical", "less_or_equal"),
+            ">=":       ("logical", "more_or_equal"),
+            "==":       ("logical", "equal"),
+            "<>":       ("logical", "not_equal"),
+            # логические операторы
             "и":        ("logical", "and"),
             "или":      ("logical", "or"),
             "не":       ("logical", "not"),
-            # Символы
+
+            #   СИМВОЛЫ
+            # присваивание
+            ":=":       ("assignment", "assign"),
             "(":        ("brackets", "open"),
             ")":        ("brackets", "close"),
-            ",":        ("comma",),
+            # скобки для массивов
             "[":        ("sq_brackets", "open"),
             "]":        ("sq_brackets", "close"),
-            # "\"":       ("comma", "text_comma"),
-            # "\'":       ("comma", "symb_comma"),
-            # Ввод-Вывод
+            # скобки для арифметических выражений
+            "{":        ("arith_brackets", "open"),
+            "}":        ("arith_brackets", "close"),
+            # скобки для логических выражений
+            "<":        ("log_brackets", "open"),
+            ">":        ("log_brackets", "close"),
+            # запятые
+            ",":        ("comma",),
+
+            #   ВВОД-ВЫВОД
             "ВВОД":     ("io", "input"),
             "ВЫВОД":    ("io", "output"),
         }
@@ -83,11 +99,10 @@ class Lexer():
         """
         Проверка корректности числа
         """
-        # TODO:CHANGE TO REAL NUMBER
         if re.match(r'^[-+]?\d+(\.\d*)?$', value):
-            return "float" if '.' in value else "int"
+            return float if '.' in value else int
         elif re.match(r'^[-+]?\.\d+$', value):
-            return "float"
+            return float
         else:
             return None
 
@@ -105,10 +120,8 @@ class Lexer():
         if (token in self.keywords.keys()):
             return self.keywords[token]
         elif (token[0] in "\'\""):
-            return ("data", "text") if token[0] == "\"" else ("data", "symbol")
+            return ("data", str) if token[0] == "\"" else ("data", char)
         elif num_type := self._get_number_type(token):
-            # return ("datatype", "int" if "." in token else "float")
-            # FIXME
             return ("data", num_type)
         elif self._is_valid_identifier(token):
             return ("identifier",)
@@ -117,7 +130,9 @@ class Lexer():
 
     def tokenize(self, code):
         """
-        TODO
+        Главный метод программы
+
+        Возвращает список токенов 
         """
 
         tokens = []
@@ -138,7 +153,7 @@ class Lexer():
 
             # Разбиваем строку на слова и операторы
             statements = re.findall(
-                r'\'[^\"]+\'|\"[^\"]+\"|\w+|<=|>=|==|<>|:=|,|[+\-^=\(\)\[\]]', line)
+                r'\'[^\"]+\'|\"[^\"]+\"|\w+|<=|>=|==|<>|:=|,|\+|\-|\*|\\|\^|\<|\>|\{|\}|мод|[+\-^=\(\)\[\]]', line)
 
             for statement in statements:
                 token_as_keyword = self._get_token_type(statement)

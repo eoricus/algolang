@@ -1,5 +1,3 @@
-import sys
-
 from src.nodes import IdentifierNode, Identifiers, Node
 
 
@@ -20,8 +18,6 @@ class InputNode(Node):
         if not (self.identifier.name in globals or self.identifier.name in locals):
             raise ValueError("Переменная не определена")
 
-        # TODO  проверка на массив
-        #       если массив, то построчный ввод в каждый элемент
         value = input()
         # for line in sys.stdin.readlines():
         #     value += line

@@ -19,9 +19,8 @@ class Lexeme():
     def __str__(self) -> str:
         return f'value: {self.value}, key: {self.key}, line: {self.line}, indent: {self.indent}'
 
-    # TODO: Перевести сравнение токенов сюда 
-    # def __eq__(self, __value: object) -> bool:
-    #     pass
+    def __eq__(self, __value: object) -> bool:
+        return self.is_match(__value)
 
     def is_match(self, *args) -> bool:
         """
@@ -119,7 +118,6 @@ class Token(Lexeme):
         :param keys: ключи токенов с референсным значением
         :param is_raise_an_exception: вызывать ли исключение
         """
-        # TODO
         keys = (keys,) if isinstance(keys[0], str) else keys
 
         if not self.is_match(*keys):
