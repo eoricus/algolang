@@ -11,7 +11,7 @@ class Interpreter():
         # Загружаем все моудли в globals
         for module in self.modules:
             if module.name in self.globals:
-                self.error("Модуль с таким названием уже существует!")
+                raise ValueError("Модуль с таким названием уже существует!")
 
             self.globals[module.name] = module
 

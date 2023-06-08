@@ -41,7 +41,7 @@ class IdentifierNode(Node):
                 pass
         # Создание новой переменной
         else:
-            if not self.type in ALGOTYPES:
+            if not self.type in ALGOTYPES.values():
                 raise TypeError("Некорректный тип переменных")
 
             if self.value is None:

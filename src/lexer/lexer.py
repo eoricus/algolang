@@ -15,84 +15,88 @@ class Lexer():
 
         self.keywords = {
             #   ДЕКЛАРАЦИЯ МОДУЛЯ
-            "АЛГ":      ("module", "declaration"),
-            "ДАНО":     ("module", "parameters"),
-            "НАДО":     ("module", "return_type"),
-            "ВОЗВРАТ":  ("module", "return"),
-            "ВЫХОД":    ("module", "exit"),
-            "НАЧ":      ("module", "start"),
-            "КОН":      ("module", "end"),
+            "АЛГ":          ("module", "declaration"),
+            "ДАНО":         ("module", "parameters"),
+            "НАДО":         ("module", "return_type"),
+            "ВОЗВРАТ":      ("module", "return"),
+            "ВЫХОД":        ("module", "exit"),
+            "НАЧ":          ("module", "start"),
+            "КОН":          ("module", "end"),
 
             #   ВХОД И ВЫХОД ПРОГРАММЫ
-            "НАЧАЛО":   ("global", "start"),
-            "КОНЕЦ":    ("global", "end"),
+            "НАЧАЛО":       ("global", "start"),
+            "КОНЕЦ":        ("global", "end"),
 
             #   УСЛОВНЫЕ ОПЕРАТОРЫ
-            "ЕСЛИ":     ("condition", "if_declaration"),
-            "ТО":       ("condition", "if_start"),
-            "ИНАЧЕ":    ("condition", "else"),
-            "ВЫБОР":    ("condition", "switch_declaration"),
-            "КОГДА":    ("condition", "case_declaration"),
+            "ЕСЛИ":         ("condition", "if_declaration"),
+            "ТО":           ("condition", "if_start"),
+            "ИНАЧЕ":        ("condition", "else"),
+            "ВЫБОР":        ("condition", "switch_declaration"),
+            "КОГДА":        ("condition", "case_declaration"),
 
             #   ЦИКЛЫ
-            "ДЛЯ":      ("loop", "for_declaration"),
-            "ПО":       ("loop", "for_end_of_range"),
-            "ШАГ":      ("loop", "for_step"),
-            "ПОКА":     ("loop", "while_declaration"),
-            "ВЫПОЛНЯТЬ": ("loop", "do_while"),
+            "ДЛЯ":          ("loop", "for_declaration"),
+            "ПО":           ("loop", "for_end_of_range"),
+            "ШАГ":          ("loop", "for_step"),
+            "ПОКА":         ("loop", "while_declaration"),
+            "ВЫПОЛНЯТЬ":    ("loop", "do_while"),
 
             #   ТИПЫ ДАННЫХ
-            "ЦЕЛ":      ("type_declaration", int),
-            "ВЕЩ":      ("type_declaration", float),
-            "ЛОГ":      ("type_declaration", bool),
-            "СИМВ":     ("type_declaration", char),
-            "ТЕКСТ":    ("type_declaration", str),
-            "МАССИВ":   ("arr_declaration",  list[str]),
+            "ЦЕЛ":          ("type_declaration", int),
+            "ВЕЩ":          ("type_declaration", float),
+            "ЛОГ":          ("type_declaration", bool),
+            "СИМВ":         ("type_declaration", char),
+            "ТЕКСТ":        ("type_declaration", str),
+            "МАССИВ":       ("arr_declaration",  list[str]),
 
             #   ЛОГИЧЕСКИЕ ЗНАЧЕНИЯ
-            "ЛОЖЬ":     ("data", "logical"),
-            "ИСТИНА":   ("data", "logical"),
+            "ЛОЖЬ":         ("data", "logical"),
+            "ИСТИНА":       ("data", "logical"),
 
             #   ОПЕРАЦИИ
             # арифметические операторы
-            "+":        ("arithmetic", "add"),
-            "-":        ("arithmetic", "sub"),
-            "*":        ("arithmetic", "mpy"),
-            "/":        ("arithmetic", "div"),
-            "^":        ("arithmetic", "pow"),
-            "мод":      ("arithmetic", "mod"),
+            "+":            ("arithmetic", "add"),
+            "-":            ("arithmetic", "sub"),
+            "*":            ("arithmetic", "mpy"),
+            "/":            ("arithmetic", "div"),
+            "^":            ("arithmetic", "pow"),
+            "мод":          ("arithmetic", "mod"),
             # сравнительные операторы
-            "<":        ("logical", "less"),
-            ">":        ("logical", "more"),
-            "<=":       ("logical", "less_or_equal"),
-            ">=":       ("logical", "more_or_equal"),
-            "==":       ("logical", "equal"),
-            "<>":       ("logical", "not_equal"),
+            "<":            ("logical", "less"),
+            ">":            ("logical", "more"),
+            "<=":           ("logical", "less_or_equal"),
+            ">=":           ("logical", "more_or_equal"),
+            "==":           ("logical", "equal"),
+            "<>":           ("logical", "not_equal"),
             # логические операторы
-            "и":        ("logical", "and"),
-            "или":      ("logical", "or"),
-            "не":       ("logical", "not"),
+            "и":            ("logical", "and"),
+            "или":          ("logical", "or"),
+            "не":           ("logical", "not"),
 
             #   СИМВОЛЫ
             # присваивание
-            ":=":       ("assignment", "assign"),
-            "(":        ("brackets", "open"),
-            ")":        ("brackets", "close"),
+            ":=":           ("assignment", "assign"),
+            "(":            ("brackets", "open"),
+            ")":            ("brackets", "close"),
             # скобки для массивов
-            "[":        ("sq_brackets", "open"),
-            "]":        ("sq_brackets", "close"),
+            "[":            ("sq_brackets", "open"),
+            "]":            ("sq_brackets", "close"),
             # скобки для арифметических выражений
-            "{":        ("arith_brackets", "open"),
-            "}":        ("arith_brackets", "close"),
+            "{":            ("arith_brackets", "open"),
+            "}":            ("arith_brackets", "close"),
             # скобки для логических выражений
-            "<":        ("log_brackets", "open"),
-            ">":        ("log_brackets", "close"),
+            "<":            ("log_brackets", "open"),
+            ">":            ("log_brackets", "close"),
             # запятые
-            ",":        ("comma",),
+            ",":            ("comma",),
 
             #   ВВОД-ВЫВОД
-            "ВВОД":     ("io", "input"),
-            "ВЫВОД":    ("io", "output"),
+            "ВВОД":         ("io", "input"),
+            "ВЫВОД":        ("io", "output"),
+
+            #   ФАЙЛОВАЯ СИСТЕМА
+            "ЧИТАТЬ":       ("file", "read"),
+            "ЗАПИСАТЬ":     ("file", "write"),
         }
 
     def _get_number_type(self, value):

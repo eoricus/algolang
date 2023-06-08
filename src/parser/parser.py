@@ -1,6 +1,7 @@
 from typing import Optional
 from src.nodes import *
 from src.nodes.char import char
+from src.parser.ParserFiles import ParserFiles
 from src.parser.ParserBase import ParserBase
 from src.parser.ParserModules import ParserModules
 from src.parser.ParserRelations import ParserRelations
@@ -32,6 +33,7 @@ class Parser(ParserBase):
         self.loops = ParserLoops(self)
         self.modules = ParserModules(self)
         self.relations = ParserRelations(self)
+        self.files = ParserFiles(self)
 
         self._HANDLERS = {
             # МОДУЛИ
@@ -57,12 +59,12 @@ class Parser(ParserBase):
             ("loop", "while_declaration"):          self.loops._while_declaration,
             ("loop", "do_while"):                   self.loops._do_while,
             # ДЕКЛАРАЦИИ ТИПОВ
-            ("type_declaration", int):              lambda: self.data._declaration("ЦЕЛ"),
-            ("type_declaration", float):            lambda: self.data._declaration("ВЕЩ"),
-            ("type_declaration", bool):             lambda: self.data._declaration("ЛОГ"),
-            ("type_declaration", char):             lambda: self.data._declaration("СИМВ"),
-            ("type_declaration", str):              lambda: self.data._declaration("ТЕКСТ"),
-            ("arr_declaration", list):              lambda: self.data._declaration("text", True),
+            ("type_declaration", int): lambda: self.data._declaration("ЦЕЛ"),
+            ("type_declaration", float): lambda: self.data._declaration("ВЕЩ"),
+            ("type_declaration", bool): lambda: self.data._declaration("ЛОГ"),
+            ("type_declaration", char): lambda: self.data._declaration("СИМВ"),
+            ("type_declaration", str): lambda: self.data._declaration("ТЕКСТ"),
+            ("arr_declaration", list): lambda: self.data._declaration("text", True),
             # ОТНОШЕНИЯ
             ("relation", "less"):                   self.relations._less,
             ("relation", "more"):                   self.relations._more,
@@ -79,7 +81,10 @@ class Parser(ParserBase):
             # ВВОД-ВЫВОД
             ('io', 'input'): 						self.io._input,
             ("io", "output"): 						self.io._output,
-            ("identifier",):                        self._identifier
+            ("identifier",):                        self._identifier,
+            # ФАЙЛЫ
+            ("file", "read"):                      self.files._read,
+            ("file", "write"):                     self.files._write,
         }
 
     @property
@@ -96,14 +101,14 @@ class Parser(ParserBase):
 
         # Проверка модуля входа в программу (main)
         if not isinstance(main, MainNode):
-            self.error(
+            raise ValueError(
                 "Неправильно определен основной модуль программы (точка входа)")
         # Проверка полученных модулей
         if not all(isinstance(module, ModuleNode) for module in modules):
-            self.error("Программа не может содержать выражения вне модулей")
+            raise ValueError("Программа не может содержать выражения вне модулей")
         # Проверка конца программы
         if not self.token.is_match(('module', 'end'), ("global", "end")):
-            self.error(
+            raise ValueError(
                 f"Ожидался конец программы (КОН), получен {self.token.key}")
 
         return modules, main

@@ -2,6 +2,8 @@ from typing import Any, Optional
 from src.nodes import *
 from src.nodes.Node import node
 from src.nodes.char import char
+from src.nodes.files.FilesReadNode import FilesReadNode
+from src.nodes.files.FilesWriteNode import FilesWriteNode
 from src.parser.Token import Token
 
 
@@ -78,8 +80,11 @@ class ParserBase():
             expr = []
 
             # Пока следующий токен запятая
-            while self.token.eat(("comma",)):
+            while True:
                 expr.append(self.parse_expression())
+
+                if not self.token.eat(("comma",)):
+                    break
 
             self.token.eat(("sq_brackets", "close"), True)
 
@@ -132,6 +137,40 @@ class ParserBase():
         # Возвращает InputNode
         if self.token.eat(("io", "input")):
             return InputNode()
+
+        # Чтение из файлов
+        #
+        # Возвращает объект вызова метода, или идентификатор
+        if self.token.eat(('file', 'read')):
+            if self.token.eat(("brackets", "open"), True):
+                arguments = []
+
+                # Пока следующий токен запятая
+                while True:
+                    if (res := self.parse_expression()) is not None:
+                        arguments.append(res)
+                    if not self.token.eat(("comma",)):
+                        break
+
+                self.token.eat(("brackets", "close"), True)
+                return FilesReadNode(arguments)
+
+        # Запись в файл
+        #
+        # Возвращает объект вызова метода, или идентификатор
+        if self.token.eat(('file', 'write')):
+            if self.token.eat(("brackets", "open"), True):
+                arguments = []
+
+                # Пока следующий токен запятая
+                while True:
+                    if (res := self.parse_expression()) is not None:
+                        arguments.append(res)
+                    if not self.token.eat(("comma",)):
+                        break
+
+                self.token.eat(("brackets", "close"), True)
+                return FilesWriteNode(arguments)
 
         # Данные
         #
@@ -186,7 +225,8 @@ class ParserBase():
             if handler is None:
                 if (self.token.key[0] == "data"):
                     self.parse_expression()
-                self.error(f"Неожиданный тип токена {self.token.current}")
+                raise ValueError(
+                    f"Неожиданный тип токена {self.token.current}")
 
             if self.token.is_match(("global", "start")):
                 main = handler()
